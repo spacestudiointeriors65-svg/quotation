@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Studio Interiors — Quotation Tool v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#c8973a;--gold-lt:#e0b96a;--dark:#1c1c1c;--cream:#faf7f2;--warm:#f0ebe0;--border:#ddd5c4;--text:#2a2a2a;--muted:#8a8070;--acc:#b8864a;--red:#c0392b}
+body{font-family:'Jost',sans-serif;background:#ece7dc;color:var(--text);font-size:13px}
+
+/* HEADER */
+.hdr{background:var(--dark);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:300;box-shadow:0 2px 12px rgba(0,0,0,.5);position:relative}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.hdr-logo img{height:40px;display:block}
+.hdr-sep{width:1px;height:28px;background:#333}
+.hdr-lbl{font-size:9px;letter-spacing:3px;color:#555;text-transform:uppercase}
+.hdr-tag{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-top:1px}
+.btn-dl{background:var(--gold);color:var(--dark);border:none;padding:8px 20px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:600;transition:background .15s}
+.btn-dl:hover{background:var(--gold-lt)}
+.hdr-ab{height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-lt),var(--gold));position:absolute;bottom:0;left:0;right:0}
+
+/* CONFIG STRIP */
+.cfg{background:#161616;border-top:1px solid #2a2a2a;border-bottom:3px solid var(--gold);padding:9px 24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;z-index:100}
+.cfg-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#555;white-space:nowrap}
+.tgl-g{display:flex;border:1px solid #333;overflow:hidden}
+.tgl{padding:5px 14px;background:transparent;border:none;color:#666;font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.tgl.on{background:var(--gold);color:var(--dark);font-weight:600}
+.cfg-sel{background:#252525;border:1px solid #333;color:#ccc;padding:5px 26px 5px 10px;font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23666'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;outline:none}
+.disc-pre{font-size:11px;color:var(--red);font-weight:500}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 90px)}
+.fc{flex:1;padding:18px 22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.sc{width:276px;background:var(--dark);padding:18px 15px;display:flex;flex-direction:column;gap:11px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;flex-shrink:0}
+
+/* SECTIONS */
+.sec{background:white;padding:18px 20px;border-left:3px solid transparent;transition:border-color .2s}
+.sec:focus-within{border-left-color:var(--gold)}
+.sec-h{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.sec-n{width:22px;height:22px;background:var(--dark);color:#f5f0e8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.sec-t{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;letter-spacing:1px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld.s2{grid-column:1/-1}
+label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:500}
+input,select,textarea{border:1px solid var(--border);background:var(--cream);padding:7px 10px;font-size:13px;font-family:'Jost',sans-serif;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);background:white}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238a8070'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+textarea{resize:vertical;min-height:56px}
+
+/* SUBSECTIONS */
+.ss{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--warm)}
+.ss:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.ss-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:8px}
+.ss-t{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dark);font-weight:600}
+
+/* RENAME INPUT */
+.rename-inp{border:none;border-bottom:1px dashed var(--border);background:transparent;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dark);font-weight:600;font-family:'Jost',sans-serif;padding:0 0 1px 0;width:auto;min-width:100px;max-width:200px}
+.rename-inp:focus{outline:none;border-bottom-color:var(--gold)}
+
+/* COUNT / TABS */
+.cnt{display:flex;gap:5px}
+.cb{padding:4px 11px;border:1px solid var(--border);background:var(--cream);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.cb:hover{border-color:var(--gold)}
+.cb.on{background:var(--dark);color:#f5f0e8;border-color:var(--dark)}
+.rtabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.rtab{padding:5px 12px;border:1px solid var(--border);background:var(--cream);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.rtab:hover{background:var(--warm)}
+.rtab.on{background:var(--gold);color:var(--dark);border-color:var(--gold);font-weight:600}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.chip{padding:5px 12px;border:1px solid var(--border);background:var(--cream);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--gold);background:#fdf9f2}
+.chip.on{background:var(--dark);color:#f5f0e8;border-color:var(--dark)}
+
+/* BUTTONS */
+.add-btn{padding:5px 13px;border:1px dashed var(--border);background:transparent;font-family:'Jost',sans-serif;font-size:10px;cursor:pointer;color:var(--muted);transition:all .15s}
+.add-btn:hover{border-color:var(--gold);color:var(--gold);background:#fdf9f2}
+.rm-btn{padding:3px 8px;border:1px solid #eee;background:#fff5f5;font-family:'Jost',sans-serif;font-size:10px;cursor:pointer;color:var(--red)}
+.rm-btn:hover{background:#fde8e8}
+.add-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+
+/* ROOM CARD */
+.rcard{border:1px solid var(--border);padding:11px 13px;margin-bottom:10px;background:var(--cream)}
+.rcard-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+
+/* MINI TABLE */
+.mtbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:7px}
+.mtbl th{background:var(--dark);color:#f5f0e8;padding:6px 9px;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:500;text-align:left}
+.mtbl th.r{text-align:right}
+.mtbl td{border-bottom:1px solid #f0ebe0;padding:0;vertical-align:middle}
+.mtbl td input,.mtbl td select{border:none;background:transparent;padding:6px 9px;font-size:12px;font-family:'Jost',sans-serif;width:100%}
+.mtbl td input:focus,.mtbl td select:focus{background:#fffbf4;outline:none}
+.mtbl td.v{background:var(--cream);padding:6px 9px;text-align:right;font-weight:500;white-space:nowrap;min-width:78px}
+.mtbl td.a{width:26px;text-align:center}
+.mtbl tr:hover td{background:#fdf9f2}
+.mtbl tr:hover td.v{background:#f5ede0}
+
+/* DUAL COST */
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+
+/* LINE ITEMS TABLE */
+.tblw{overflow-x:auto;margin-top:4px}
+.itbl{width:100%;border-collapse:collapse;font-size:12px;min-width:500px}
+.itbl thead tr{background:var(--dark)}
+.itbl th{color:#f5f0e8;padding:8px 9px;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:500;text-align:left}
+.itbl th.r{text-align:right}
+.itbl td{border-bottom:1px solid #f0ebe0;padding:0;vertical-align:middle}
+.itbl td.inp-cell{background:#faf6ef;}
+.itbl td.inp-cell input{background:transparent}
+.itbl td.inp-cell:focus-within{background:#fff8ec;}
+.itbl td input{border:none;border-bottom:1.5px solid #e0d8cc;background:#fdf9f4;padding:7px 9px;font-size:12px;width:100%;font-family:'Jost',sans-serif;transition:border-color .15s,background .15s}
+.itbl td input:focus{background:#fff8ec;border-bottom:2px solid var(--gold);outline:none}
+.itbl td input:disabled{background:transparent;border-bottom:1px solid transparent;color:var(--muted);font-style:italic}
+.itbl td.val{background:var(--cream);padding:7px 9px;text-align:right;font-weight:500;white-space:nowrap;min-width:80px}
+.itbl td.act{width:22px;text-align:center;padding:2px}
+.itbl tr:hover td{background:#fdf9f2}
+.itbl tr:hover td.val{background:#f5ede0}
+.igrp td{background:#f5f0e8;padding:5px 9px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)}
+.ispec td{background:#fdf9f2;padding:10px 12px;border-bottom:1px solid #eee}
+.spec-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sf label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+.sf select{border:1px solid var(--border);background:white;padding:4px 7px;font-size:11px;font-family:'Jost',sans-serif;width:100%;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4'%3E%3Cpath d='M0 0l3.5 4 3.5-4z' fill='%238a8070'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px}
+.del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:13px;line-height:1;padding:2px 4px;transition:color .15s;display:block}
+.del-btn:hover{color:var(--red)}
+.exp-btn{background:none;border:1px solid #e0d8cc;cursor:pointer;color:var(--muted);font-size:9px;padding:2px 5px;transition:all .15s;font-family:'Jost',sans-serif;letter-spacing:.5px;white-space:nowrap}
+.exp-btn:hover{border-color:var(--gold);color:var(--gold)}
+.sub-r td{background:#fdf7ee;padding:8px 9px;font-weight:600;border-top:2px solid var(--gold)}
+.disc-r td{background:#fff5f5;padding:7px 9px;color:var(--red)}
+.gt-r td{background:var(--dark);color:#f5f0e8;padding:10px 9px;font-weight:500}
+.gst-r td{background:#f0ebe0;padding:6px 9px;font-size:11px;color:var(--muted)}
+
+/* MATERIALS */
+.mw{border:1px solid var(--border)}
+.mr{display:grid;grid-template-columns:148px 1fr}
+.mk{padding:8px 12px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);background:var(--cream);border-bottom:1px solid var(--border);font-weight:500;display:flex;align-items:center}
+.mv input{border:none;border-left:1px solid var(--border);border-bottom:1px solid var(--border);background:white;padding:8px 12px;width:100%;font-size:12px;font-family:'Jost',sans-serif}
+.mv input:focus{background:#fffbf4;outline:none;border-left-color:var(--gold)}
+.mr:last-child .mk,.mr:last-child .mv input{border-bottom:none}
+
+/* SUMMARY */
+.sl{font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);padding-bottom:9px;border-bottom:1px solid #303030;color:#f5f0e8}
+.sl span{color:var(--gold)}
+.sdv{border:none;border-top:1px solid #303030}
+.slim{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#5a5550;margin-bottom:3px}
+.sname{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:300;color:#f5f0e8;line-height:1.2}
+.smeta{font-size:10px;color:#7a7570;margin-top:2px}
+.sli{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2825;font-size:10px;gap:5px}
+.sli .n{color:#c4bdb4;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+.sli .a{color:var(--gold);white-space:nowrap;font-weight:500;font-size:10px}
+.sli.red .a{color:var(--red)}
+.stot{background:#252220;padding:11px 12px;border-left:3px solid var(--gold);margin-top:5px}
+.stot-l{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#5a5550}
+.stot-v{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:300;color:#f5f0e8;margin-top:1px}
+.stot-n{font-size:10px;color:#5a5550;margin-top:2px}
+.spay{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #2a2825;font-size:10px}
+.spay .pn{color:#7a7570}.spay .pa{color:#c4bdb4;font-weight:500}
+.se{font-size:11px;color:#3a3835;font-style:italic;text-align:center;padding:18px 0}
+.stg{font-family:'Cormorant Garamond',serif;font-size:12px;font-style:italic;color:#5a5550;text-align:center;margin-top:auto;padding-top:9px;border-top:1px solid #303030}
+.wbadge{display:inline-block;background:#2a2825;border:1px solid #404040;padding:3px 9px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-lt);margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l">
+    <div>
+      <img src="https://static.wixstatic.com/media/9919c1_463c56997d8b464b8d3c08a87b2fd75e~mv2.png/v1/crop/x_0,y_0,w_285,h_150/fill/w_140,h_74,al_c,q_85,enc_avif,quality_auto/Untitled%20design.png"
+           style="height:40px;display:block"
+           onerror="this.style.display='none';document.getElementById('hdrFb').style.display='block'">
+      <div id="hdrFb" style="display:none;font-family:'Cormorant Garamond',serif;font-size:17px;letter-spacing:4px;color:#f5f0e8">SPACE STUDIO</div>
+    </div>
+    <div class="hdr-sep"></div>
+    <div><div class="hdr-lbl">Quotation Tool</div><div class="hdr-tag">We Elevate Your Space</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="badge" style="font-size:11px;color:var(--gold)"></span>
+    <button class="btn-dl" onclick="genPDF()">↓ Download Quotation</button>
+  </div>
+  <div class="hdr-ab"></div>
+</div>
+
+<div class="cfg">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="cfg-lbl">Type of Work</span>
+    <div class="tgl-g">
+      <button class="tgl on" id="tMod" onclick="setWork('Modular')">Modular</button>
+      <button class="tgl" id="tSemi" onclick="setWork('Semi-Modular')">Semi-Modular</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:9px">
+    <span class="cfg-lbl">Discount</span>
+    <select class="cfg-sel" onchange="setDisc(+this.value)">
+      <option value="0">No Discount</option>
+      <option value="5">5%</option>
+      <option value="10">10%</option>
+      <option value="15">15%</option>
+      <option value="20">20%</option>
+    </select>
+    <span class="disc-pre" id="discPre"></span>
+  </div>
+</div>
+
+<div class="layout">
+<div class="fc" id="formCol">
+
+  <!-- S1 Client -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">1</div><div class="sec-t">Client Information</div></div>
+    <div class="g2">
+      <div class="fld"><label>Client Name *</label><input id="cname" placeholder="e.g. Sri Abhimanyu Garu" oninput="renderSummary()"></div>
+      <div class="fld"><label>Project Name / Location</label><input id="pname" placeholder="e.g. Hyderabad" oninput="renderSummary()"></div>
+      <div class="fld"><label>Property Type</label>
+        <select id="pcfg" onchange="renderSummary()">
+          <option value="">Select</option>
+          <option>1 BHK</option><option>2 BHK</option><option selected>3 BHK</option>
+          <option>4 BHK</option><option>Villa</option><option>Duplex</option>
+          <option>Commercial Office</option><option>Retail / Showroom</option>
+        </select>
+      </div>
+      <div class="fld"><label>Built-up Area (Sq.ft)</label><input id="builtup" placeholder="e.g. 1850" oninput="renderSummary()"></div>
+      <div class="fld"><label>Phone</label><input id="cphone" placeholder="+91 XXXXX XXXXX" oninput="renderSummary()"></div>
+      <div class="fld"><label>Email</label><input id="cemail" placeholder="client@email.com" oninput="renderSummary()"></div>
+      <div class="fld s2"><label>Project Address</label><input id="caddr" placeholder="Flat / Villa / Society Name, City" oninput="renderSummary()"></div>
+      <div class="fld"><label>Quote Date</label><input type="date" id="qdate"></div>
+      <div class="fld"><label>Valid Till</label><input type="date" id="qvalid"></div>
+      <div class="fld"><label>Design Consultant</label><input id="cons" value="Venkat Bandreddi"></div>
+      <div class="fld"><label>Lead Ref</label><input id="lref" placeholder="Optional"></div>
+    </div>
+  </div>
+
+  <!-- S2 Scope -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">2</div><div class="sec-t">Scope of Work</div></div>
+
+    <!-- Bedrooms -->
+    <div class="ss">
+      <div class="ss-h">
+        <span class="ss-t">Bedrooms</span>
+        <div class="cnt" id="brCnt"></div>
+      </div>
+      <div class="rtabs" id="brTabs"></div>
+      <div id="brRename" style="margin-bottom:8px"></div>
+      <div class="chips" id="brChips"></div>
+    </div>
+
+    <!-- Living Room -->
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Living Room</span></div>
+      <div class="chips" id="lvChips"></div>
+    </div>
+
+    <!-- Dining Area -->
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Dining Area</span></div>
+      <div class="chips" id="daChips"></div>
+    </div>
+
+    <!-- Pooja Room -->
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Pooja Room</span></div>
+      <div class="chips" id="prChips"></div>
+    </div>
+
+    <!-- Wash Rooms -->
+    <div class="ss">
+      <div class="ss-h">
+        <span class="ss-t">Wash Room(s)</span>
+        <button class="add-btn" onclick="addRoom('wr')">+ Add Wash Room</button>
+      </div>
+      <div id="wrCards"></div>
+    </div>
+
+    <!-- Kitchens -->
+    <div class="ss">
+      <div class="ss-h">
+        <span class="ss-t">Kitchen(s)</span>
+        <button class="add-btn" onclick="addRoom('kt')">+ Add Kitchen</button>
+      </div>
+      <div id="ktCards"></div>
+    </div>
+
+    <!-- Balconies -->
+    <div class="ss">
+      <div class="ss-h">
+        <span class="ss-t">Balcony / Terrace</span>
+        <button class="add-btn" onclick="addRoom('ba')">+ Add Balcony</button>
+      </div>
+      <div id="baCards"></div>
+    </div>
+
+    <!-- Front Elevation -->
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Front Elevation</span></div>
+      <div class="chips" id="feChips"></div>
+    </div>
+
+    <!-- Utility -->
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Utility Area</span></div>
+      <div class="g2" style="max-width:400px">
+        <div class="fld"><label>Area (Sft)</label><input id="utA" placeholder="" oninput="updateField('ut','area',this.value)"></div>
+        <div class="fld"><label>Price / Sft (₹)</label><input id="utP" placeholder="" oninput="updateField('ut','price',this.value)"></div>
+      </div>
+    </div>
+
+    <!-- False Ceiling -->
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">False Ceiling</span></div>
+      <div style="margin-bottom:10px">
+        <div class="chips" id="fcTypeChips"></div>
+      </div>
+      <div class="g2" style="max-width:400px" id="fcFields" style="display:none">
+        <div class="fld"><label>Area (Sft)</label><input id="fcA" placeholder="" oninput="updateField('fc','area',this.value)"></div>
+        <div class="fld"><label>Price / Sft (₹)</label><input id="fcP" placeholder="" oninput="updateField('fc','price',this.value)"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- S3 Line Items Table -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">3</div><div class="sec-t">Line Items</div></div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:10px">Items are auto-added when you select room options above. Enter Area × Price to calculate. Click ⚙ to set material specs per item.</div>
+    <div class="tblw">
+      <table class="itbl">
+        <thead>
+          <tr>
+            <th style="width:38%">Description</th>
+            <th class="r" style="width:13%">Area (Sft)</th>
+            <th class="r" style="width:16%">Price/Sft (₹)</th>
+            <th class="r" style="width:15%">Value (₹)</th>
+            <th style="width:10%">Spec</th>
+            <th style="width:8%"></th>
+          </tr>
+        </thead>
+        <tbody id="itBody"></tbody>
+        <tbody id="itTotals"></tbody>
+      </table>
+    </div>
+    <div class="add-wrap" style="margin-top:10px">
+      <button class="add-btn" onclick="addManual('')">+ Add Row</button>
+      <button class="add-btn" onclick="addManualGrp()">+ Section Header</button>
+    </div>
+  </div>
+
+  <!-- S4 Appliances -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">4</div><div class="sec-t">Appliances</div></div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px">Select appliance type and enter price. Can be added multiple times.</div>
+    <table class="mtbl" id="apTbl">
+      <thead><tr>
+        <th style="width:40%">Appliance Type</th>
+        <th style="width:30%">Brand / Details</th>
+        <th class="r" style="width:20%">Price (₹)</th>
+        <th style="width:10%"></th>
+      </tr></thead>
+      <tbody id="apBody"></tbody>
+    </table>
+    <div class="add-wrap">
+      <button class="add-btn" onclick="addAppliance()">+ Add Appliance</button>
+    </div>
+  </div>
+
+  <!-- S5 Curtains -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">5</div><div class="sec-t">Curtains</div></div>
+    <table class="mtbl">
+      <thead><tr>
+        <th style="width:28%">Item / Area</th>
+        <th class="r" style="width:18%">Measurement</th>
+        <th class="r" style="width:18%">Price/Sft (₹)</th>
+        <th class="r" style="width:18%">Total (₹)</th>
+        <th style="width:8%"></th>
+      </tr></thead>
+      <tbody id="cuBody"></tbody>
+    </table>
+    <div class="add-wrap">
+      <button class="add-btn" onclick="addCurtain()">+ Add Curtain Row</button>
+    </div>
+  </div>
+
+  <!-- S6 Furniture -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">6</div><div class="sec-t">Furniture</div></div>
+    <table class="mtbl">
+      <thead><tr>
+        <th style="width:40%">Item Type</th>
+        <th style="width:20%">Qty</th>
+        <th class="r" style="width:25%">Price (₹)</th>
+        <th style="width:10%"></th>
+      </tr></thead>
+      <tbody id="fuBody"></tbody>
+    </table>
+    <div class="add-wrap">
+      <button class="add-btn" onclick="addFurniture()">+ Add Furniture Item</button>
+    </div>
+  </div>
+
+  <!-- S7 Electrical / Plumbing / Tiles -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">7</div><div class="sec-t">Civil & Electrical Work</div></div>
+
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Electrical Work</span></div>
+      <div class="dual">
+        <div class="fld"><label>Labour Cost (₹)</label><input id="elL" placeholder="" oninput="updateCost('elL',this.value)"></div>
+        <div class="fld"><label>Material Cost (₹)</label><input id="elM" placeholder="" oninput="updateCost('elM',this.value)"></div>
+      </div>
+    </div>
+
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Plumbing Work</span></div>
+      <div class="dual">
+        <div class="fld"><label>Labour Cost (₹)</label><input id="plL" placeholder="" oninput="updateCost('plL',this.value)"></div>
+        <div class="fld"><label>Material Cost (₹)</label><input id="plM" placeholder="" oninput="updateCost('plM',this.value)"></div>
+      </div>
+    </div>
+
+    <div class="ss">
+      <div class="ss-h"><span class="ss-t">Tiles Work</span></div>
+      <div class="dual">
+        <div class="fld"><label>Labour Cost (₹)</label><input id="tlL" placeholder="" oninput="updateCost('tlL',this.value)"></div>
+        <div class="fld"><label>Material Cost (₹)</label><input id="tlM" placeholder="" oninput="updateCost('tlM',this.value)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S8 Materials -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">8</div><div class="sec-t">Materials & Specifications</div></div>
+    <div class="mw">
+      <div class="mr"><div class="mk">Type of Work</div><div class="mv"><input id="mWork" value="Modular"></div></div>
+      <div class="mr"><div class="mk">Finish</div><div class="mv"><input id="mFin" value="Acrylic / Laminate / PVC"></div></div>
+      <div class="mr"><div class="mk">Plywood</div><div class="mv"><input id="mPly" value="IS 710 Grade 25Y Plywood / TESA HDHMR / Austin WPC"></div></div>
+      <div class="mr"><div class="mk">Hardware</div><div class="mv"><input id="mHw" value="Hettich / Ebco – Soft Close Hinges & Channels"></div></div>
+      <div class="mr"><div class="mk">Laminate</div><div class="mv"><input id="mLam" value="1mm Thick Virgo / Merino"></div></div>
+      <div class="mr"><div class="mk">Customisation</div><div class="mv"><input id="mCust" value="Onsite & Shutter in Factory with Edge Band"></div></div>
+      <div class="mr"><div class="mk">Glass</div><div class="mv"><input id="mGlass" value="Saint Gobain"></div></div>
+    </div>
+  </div>
+
+  <!-- S9 Payment -->
+  <div class="sec">
+    <div class="sec-h"><div class="sec-n">9</div><div class="sec-t">Payment Schedule</div></div>
+    <div class="g2">
+      <div class="fld"><label>Stage 1 %</label><input type="number" id="p1p" value="60" min="0" max="100" oninput="renderSummary()"></div>
+      <div class="fld"><label>Stage 1 Milestone</label><input id="p1n" value="Initial advance at order booking" oninput="renderSummary()"></div>
+      <div class="fld"><label>Stage 2 %</label><input type="number" id="p2p" value="30" min="0" max="100" oninput="renderSummary()"></div>
+      <div class="fld"><label>Stage 2 Milestone</label><input id="p2n" value="At time of selecting Laminates" oninput="renderSummary()"></div>
+      <div class="fld"><label>Stage 3 %</label><input type="number" id="p3p" value="10" min="0" max="100" oninput="renderSummary()"></div>
+      <div class="fld"><label>Stage 3 Milestone</label><input id="p3n" value="Final payment at site handover" oninput="renderSummary()"></div>
+    </div>
+    <div class="fld s2" style="margin-top:12px">
+      <label>Terms & Conditions</label>
+      <textarea id="terms">• Billing is inclusive of GST
+• All prices subject to final site measurements — may vary ±5–10%
+• Quoted rates valid for 30 days from date of issue
+• Design changes post production may attract additional charges</textarea>
+    </div>
+  </div>
+
+</div><!-- /fc -->
+
+<!-- Summary Column -->
+<div class="sc">
+  <img src="https://static.wixstatic.com/media/9919c1_463c56997d8b464b8d3c08a87b2fd75e~mv2.png/v1/crop/x_0,y_0,w_285,h_150/fill/w_140,h_74,al_c,q_85,enc_avif,quality_auto/Untitled%20design.png"
+       style="height:32px;opacity:.85;display:block" onerror="this.style.display='none'">
+  <div style="font-family:'Cormorant Garamond',serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);padding-bottom:9px;border-bottom:1px solid #303030">Quotation Preview</div>
+  <div id="sumContent"><div class="se">Fill in client details and select room items to see the live preview.</div></div>
+  <div class="stg">"We Elevate Your Space"</div>
+</div>
+</div><!-- /layout -->
+
+<script>
+// ═══════════ CONSTANTS ═══════════
+const C = {
+  brChips: ['Wardrobe','TV Unit','Dressing Unit','Walk-in Wardrobe','Work Station','Bed','Others'],
+  lvChips: ['TV Unit','Wall Panelling','Wall Art','Partition – Wooden','Partition – PVC','Console Unit','Others'],
+  daChips: ['Crockery Unit','Bar Counter','Vanity','Dining Partition'],
+  prChips: ['Inner Cabinet','Outer Cabinet','Glass Work','Doors','Antic Items'],
+  wrChips: ['Vanity','Dry Area','Wet Area','Others'],
+  ktChips: ['Base Cabinets','Wall Units','Loft','Pantry Unit','Oven Unit','Shutter','Tall Unit','Breakfast Counter'],
+  baChips: ['Sit Out','Wall Claddings','Safety Grills'],
+  feChips: ['Door Panelling','Shoe Rack','Safety Grills'],
+  fcTypes: ['Gypsum','POP','Wooden','PVC'],
+  apTypes: ['Tandoor','Corner Unit','Pantry Unit','Shutter','Chimney','Hob','Sink','Gas Oven','Grill','Wash Basin','Refrigerator','AC','Fan','TV'],
+  fuTypes: ['Sofa','Recliner','Bed','Swing','Dining Table','Chairs','Stool'],
+  brLabels: ['Master Bedroom','Bedroom 2','Bedroom 3','Bedroom 4','Bedroom 5','Bedroom 6'],
+  brShort:  ['MBR','BR2','BR3','BR4','BR5','BR6'],
+  WOOD:  ['—','Economy Wood','Premium Wood'],
+  ILAM:  ['—','0.8mm','1mm'],
+  OLAM:  ['—','1mm Lam','1mm PVC','1mm Thermo','1.2mm Acrylic','1.5mm Acrylic','2mm Acrylic'],
+  SHUT:  ['—','HDHMR – Hinged','HDHMR – Hinged (HDHMR)','Block Board – Sliding','Sliding – Lacquered Glass'],
+  WALL:  ['—','4mm WPC','6mm WPC'],
+};
+
+// ═══════════ STATE ═══════════
+let uid = 0;
+const nid = () => 'id' + (++uid);
+
+let S = {
+  work: 'Modular', disc: 0,
+  brCount: 3, brActive: 0,
+  brNames: [...C.brLabels],
+  brChips: [[],[],[],[],[],[]],
+  lvChips: [], daChips: [], prChips: [], feChips: [],
+  fcType: '',
+  washRooms: [], kitchens: [], balconies: [],
+  appliances: [], curtains: [], furniture: [],
+  costs: {elL:'',elM:'',plL:'',plM:'',tlL:'',tlM:''},
+  iF: {},     // {key: {area,price,fixed,desc}}
+  iSp: {},    // {key: {wood,iLam,oLam,shut,wall}}
+  expanded: new Set(),
+  manuals: [],
+};
+
+// helpers
+const fmtINR = n => '₹' + Math.round(Math.abs(n)).toLocaleString('en-IN');
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const gv = id => (document.getElementById(id)||{}).value||'';
+const fv = id => parseFloat(gv(id))||0;
+const getF = k => S.iF[k]||{area:'',price:'',fixed:'',desc:''};
+const setF = (k,f,v) => { if(!S.iF[k])S.iF[k]={area:'',price:'',fixed:'',desc:''}; S.iF[k][f]=v; };
+const getSp = k => S.iSp[k]||{};
+const setSp = (k,f,v) => { if(!S.iSp[k])S.iSp[k]={}; S.iSp[k][f]=v; };
+
+function calcV(key) {
+  const f = getF(key);
+  if(f.fixed) return parseFloat(f.fixed)||0;
+  const a = parseFloat(f.area)||0, p = parseFloat(f.price)||0;
+  return (a&&p) ? a*p : 0;
+}
+
+function allItems() {
+  // Returns ordered list of {type:'group'|'item', key, label, group}
+  const rows = [];
+  const add = (type, key, label, group) => rows.push({type, key, label, group});
+
+  // Bedrooms
+  for(let i=0;i<S.brCount;i++){
+    if(S.brChips[i].length>0){
+      add('group','grp-br'+i, S.brNames[i]);
+      S.brChips[i].forEach(c => add('item','br'+i+'-'+c.replace(/\s/g,'_'), C.brShort[i]+' – '+c, 'br'));
+    }
+  }
+  // Living
+  if(S.lvChips.length>0){ add('group','grp-lv','Living Room'); S.lvChips.forEach(c=>add('item','lv-'+c.replace(/\s/g,'_'),'Living Room – '+c,'lv')); }
+  // Dining
+  if(S.daChips.length>0){ add('group','grp-da','Dining Area'); S.daChips.forEach(c=>add('item','da-'+c.replace(/\s/g,'_'),'Dining Area – '+c,'da')); }
+  // Pooja
+  if(S.prChips.length>0){ add('group','grp-pr','Pooja Room'); S.prChips.forEach(c=>add('item','pr-'+c.replace(/\s/g,'_'),'Pooja Room – '+c,'pr')); }
+  // Wash Rooms
+  S.washRooms.forEach(r=>{ if(r.chips.length>0){ add('group','grp-wr'+r.id,r.name); r.chips.forEach(c=>add('item','wr'+r.id+'-'+c.replace(/\s/g,'_'),r.name+' – '+c,'wr')); } });
+  // Kitchens
+  S.kitchens.forEach(r=>{ if(r.chips.length>0){ add('group','grp-kt'+r.id,r.name); r.chips.forEach(c=>add('item','kt'+r.id+'-'+c.replace(/\s/g,'_'),r.name+' – '+c,'kt')); } });
+  // Balconies
+  S.balconies.forEach(r=>{ if(r.chips.length>0){ add('group','grp-ba'+r.id,r.name); r.chips.forEach(c=>add('item','ba'+r.id+'-'+c.replace(/\s/g,'_'),r.name+' – '+c,'ba')); } });
+  // Front Elevation
+  if(S.feChips.length>0){ add('group','grp-fe','Front Elevation'); S.feChips.forEach(c=>add('item','fe-'+c.replace(/\s/g,'_'),'Front Elevation – '+c,'fe')); }
+  // Utility
+  const utF=getF('ut'); if(utF.area||utF.price){ add('group','grp-ut','Utility'); add('item','ut','Utility Area','ut'); }
+  // False Ceiling
+  if(S.fcType){ add('group','grp-fc','False Ceiling'); add('item','fc','False Ceiling – '+S.fcType,'fc'); }
+  // Appliances
+  if(S.appliances.length>0){ add('group','grp-ap','Appliances'); S.appliances.forEach(a=>add('item','ap-'+a.id,a.type,'ap')); }
+  // Curtains
+  if(S.curtains.length>0){ add('group','grp-cu','Curtains'); S.curtains.forEach(cu=>add('item','cu-'+cu.id,cu.item||'Curtain','cu')); }
+  // Furniture
+  if(S.furniture.length>0){ add('group','grp-fu','Furniture'); S.furniture.forEach(f=>add('item','fu-'+f.id,f.type,'fu')); }
+  // Electrical
+  const costs = S.costs;
+  if(costs.elL||costs.elM){ add('group','grp-el','Electrical Work'); if(costs.elL)add('item','el-labor','Electrical – Labour','el'); if(costs.elM)add('item','el-material','Electrical – Material','el'); }
+  if(costs.plL||costs.plM){ add('group','grp-pl','Plumbing Work'); if(costs.plL)add('item','pl-labor','Plumbing – Labour','pl'); if(costs.plM)add('item','pl-material','Plumbing – Material','pl'); }
+  if(costs.tlL||costs.tlM){ add('group','grp-tl','Tiles Work'); if(costs.tlL)add('item','tl-labor','Tiles – Labour','tl'); if(costs.tlM)add('item','tl-material','Tiles – Material','tl'); }
+  // Manual
+  S.manuals.forEach(m=>{ if(m.type==='group')add('group','grp-mn'+m.id,m.desc); else add('item','mn-'+m.id,m.desc||'','mn'); });
+
+  return rows;
+}
+
+function getItemVal(key) {
+  // Cost map for simple fixed keys
+  const cm = {
+    'el-labor':parseFloat(S.costs.elL)||0,'el-material':parseFloat(S.costs.elM)||0,
+    'pl-labor':parseFloat(S.costs.plL)||0,'pl-material':parseFloat(S.costs.plM)||0,
+    'tl-labor':parseFloat(S.costs.tlL)||0,'tl-material':parseFloat(S.costs.tlM)||0,
+  };
+  if(key in cm) return cm[key];
+  // Appliance
+  if(key.startsWith('ap-')){ const a=S.appliances.find(x=>'ap-'+x.id===key); return a?parseFloat(a.price)||0:0; }
+  // Curtain
+  if(key.startsWith('cu-')){ const cu=S.curtains.find(x=>'cu-'+x.id===key); if(!cu)return 0; const m=parseFloat(cu.measurement)||0,p=parseFloat(cu.price)||0; return m&&p?m*p:0; }
+  // Furniture
+  if(key.startsWith('fu-')){ const f=S.furniture.find(x=>'fu-'+x.id===key); return f?parseFloat(f.price)||0:0; }
+  return calcV(key);
+}
+
+function subtotal() { return allItems().filter(r=>r.type==='item').reduce((s,r)=>s+getItemVal(r.key),0); }
+function discAmt()  { return subtotal()*S.disc/100; }
+function grandTotal(){ return subtotal()-discAmt(); }
+
+// ═══════════ CONFIG ═══════════
+function setWork(w){
+  S.work=w;
+  document.getElementById('tMod').className='tgl'+(w==='Modular'?' on':'');
+  document.getElementById('tSemi').className='tgl'+(w==='Semi-Modular'?' on':'');
+  document.getElementById('mWork').value=w;
+  renderSummary();
+}
+function setDisc(v){
+  S.disc=v;
+  const pre=document.getElementById('discPre');
+  const d=discAmt();
+  pre.textContent=v>0&&d>0?'–'+fmtINR(d):'';
+  renderTable(); renderSummary();
+}
+
+// ═══════════ ROOM CHIPS ═══════════
+function renderRoomChips(elId, list, selectedArr, toggleFn) {
+  const el=document.getElementById(elId); if(!el)return;
+  el.innerHTML='';
+  list.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='chip'+(selectedArr.includes(c)?' on':'');
+    b.textContent=c;
+    b.onclick=()=>toggleFn(c);
+    el.appendChild(b);
+  });
+}
+function toggleChip(arr, c){ const i=arr.indexOf(c); if(i>=0)arr.splice(i,1); else arr.push(c); }
+
+// ═══════════ BEDROOMS ═══════════
+function renderBR(){
+  // Count buttons
+  const cb=document.getElementById('brCnt'); cb.innerHTML='';
+  [1,2,3,4,5,6].forEach(n=>{
+    const b=document.createElement('button');
+    b.className='cb'+(S.brCount===n?' on':'');
+    b.textContent=n+' BR';
+    b.onclick=()=>setBRCount(n);
+    cb.appendChild(b);
+  });
+  // Tabs
+  const tabs=document.getElementById('brTabs'); tabs.innerHTML='';
+  for(let i=0;i<S.brCount;i++){
+    const b=document.createElement('button');
+    b.className='rtab'+(S.brActive===i?' on':'');
+    b.textContent=S.brNames[i];
+    b.onclick=()=>setActiveBR(i);
+    tabs.appendChild(b);
+  }
+  // Rename
+  const rn=document.getElementById('brRename');
+  rn.innerHTML=`<div style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted)">
+    <span style="font-size:9px;letter-spacing:1px">Rename:</span>
+    <input class="rename-inp" value="${esc(S.brNames[S.brActive])}" 
+      oninput="S.brNames[${S.brActive}]=this.value;renderBR();renderTable();renderSummary()"
+      style="border:none;border-bottom:1px dashed var(--border);background:transparent;font-size:11px;font-family:'Jost',sans-serif;padding:2px 4px;width:160px;outline:none">
+  </div>`;
+  // Chips
+  renderRoomChips('brChips', C.brChips, S.brChips[S.brActive]||[], c=>{
+    toggleChip(S.brChips[S.brActive], c);
+    renderBR(); renderTable(); renderSummary();
+  });
+}
+function setBRCount(n){
+  for(let i=n;i<S.brCount;i++) S.brChips[i]=[];
+  S.brCount=n;
+  if(S.brActive>=n) S.brActive=n-1;
+  renderBR(); renderTable(); renderSummary();
+}
+function setActiveBR(i){ S.brActive=i; renderBR(); }
+
+// ═══════════ ADDABLE ROOMS ═══════════
+function addRoom(type){
+  const id=nid(), name=type==='wr'?'Wash Room':type==='kt'?'Kitchen':'Balcony';
+  const room={id, name, chips:[]};
+  if(type==='wr') S.washRooms.push(room);
+  else if(type==='kt') S.kitchens.push(room);
+  else S.balconies.push(room);
+  renderRoomCards(type); renderTable(); renderSummary();
+}
+function removeRoom(type,id){
+  if(type==='wr') S.washRooms=S.washRooms.filter(r=>r.id!==id);
+  else if(type==='kt') S.kitchens=S.kitchens.filter(r=>r.id!==id);
+  else S.balconies=S.balconies.filter(r=>r.id!==id);
+  renderRoomCards(type); renderTable(); renderSummary();
+}
+function renderRoomCards(type){
+  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:S.balconies;
+  const elId=type==='wr'?'wrCards':type==='kt'?'ktCards':'baCards';
+  const chips=type==='wr'?C.wrChips:type==='kt'?C.ktChips:C.baChips;
+  const el=document.getElementById(elId); if(!el)return;
+  el.innerHTML='';
+  arr.forEach(room=>{
+    const div=document.createElement('div');
+    div.className='rcard';
+    let chipHtml=chips.map(c=>`<button class="chip${room.chips.includes(c)?' on':''}" onclick="toggleRoomChip('${type}','${room.id}','${c}')">${c}</button>`).join('');
+    div.innerHTML=`
+      <div class="rcard-h">
+        <input class="rename-inp" value="${esc(room.name)}" 
+          oninput="renameRoom('${type}','${room.id}',this.value)"
+          style="border:none;border-bottom:1px dashed var(--border);background:transparent;font-family:'Jost',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:0 0 2px;width:180px;outline:none;color:var(--dark)">
+        <button class="rm-btn" onclick="removeRoom('${type}','${room.id}')">✕ Remove</button>
+      </div>
+      <div class="chips">${chipHtml}</div>`;
+    el.appendChild(div);
+  });
+}
+function renameRoom(type,id,name){
+  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:S.balconies;
+  const r=arr.find(x=>x.id===id); if(r){r.name=name; renderTable(); renderSummary();}
+}
+function toggleRoomChip(type,id,chip){
+  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:S.balconies;
+  const r=arr.find(x=>x.id===id); if(!r)return;
+  toggleChip(r.chips,chip);
+  renderRoomCards(type); renderTable(); renderSummary();
+}
+
+// ═══════════ FALSE CEILING ═══════════
+function renderFCTypes(){
+  renderRoomChips('fcTypeChips', C.fcTypes, S.fcType?[S.fcType]:[], c=>{
+    S.fcType = S.fcType===c?'':c;
+    renderFCTypes();
+    const ff=document.getElementById('fcFields');
+    if(ff)ff.style.display=S.fcType?'grid':'none';
+    renderTable(); renderSummary();
+  });
+}
+
+// ═══════════ APPLIANCES ═══════════
+function addAppliance(){
+  S.appliances.push({id:nid(),type:C.apTypes[0],price:''});
+  renderAppliances(); renderTable(); renderSummary();
+}
+function renderAppliances(){
+  const tb=document.getElementById('apBody'); if(!tb)return;
+  tb.innerHTML='';
+  S.appliances.forEach(a=>{
+    const tr=document.createElement('tr');
+    const opts=C.apTypes.map(t=>`<option${t===a.type?' selected':''}>${t}</option>`).join('');
+    tr.innerHTML=`
+      <td><select onchange="S.appliances.find(x=>x.id==='${a.id}').type=this.value;renderTable();renderSummary()">${opts}</select></td>
+      <td><input value="${esc(a.brand||'')}" placeholder="Brand / Model" oninput="S.appliances.find(x=>x.id==='${a.id}').brand=this.value"></td>
+      <td><input value="${a.price||''}" placeholder="" style="text-align:right" oninput="apPrice('${a.id}',this.value)"></td>
+      <td class="a"><button class="del-btn" onclick="S.appliances=S.appliances.filter(x=>x.id!=='${a.id}');renderAppliances();renderTable();renderSummary()">×</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function apPrice(id,v){const a=S.appliances.find(x=>x.id===id);if(a){a.price=v;renderTable();renderSummary();}}
+
+// ═══════════ CURTAINS ═══════════
+function addCurtain(){
+  S.curtains.push({id:nid(),item:'',price:'',measurement:''});
+  renderCurtains(); renderTable(); renderSummary();
+}
+function renderCurtains(){
+  const tb=document.getElementById('cuBody'); if(!tb)return;
+  tb.innerHTML='';
+  S.curtains.forEach(cu=>{
+    const val=(parseFloat(cu.measurement)||0)*(parseFloat(cu.price)||0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input value="${esc(cu.item||'')}" placeholder="e.g. Living Room" oninput="S.curtains.find(x=>x.id==='${cu.id}').item=this.value;renderTable();renderSummary()"></td>
+      <td><input value="${cu.measurement||''}" placeholder="Sft" style="text-align:right" oninput="cuField('${cu.id}','measurement',this.value)"></td>
+      <td><input value="${cu.price||''}" placeholder="Rate" style="text-align:right" oninput="cuField('${cu.id}','price',this.value)"></td>
+      <td class="v">${val>0?fmtINR(val):'—'}</td>
+      <td class="a"><button class="del-btn" onclick="S.curtains=S.curtains.filter(x=>x.id!=='${cu.id}');renderCurtains();renderTable();renderSummary()">×</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function cuField(id,f,v){const cu=S.curtains.find(x=>x.id===id);if(cu){cu[f]=v;renderCurtains();renderTable();renderSummary();}}
+
+// ═══════════ FURNITURE ═══════════
+function addFurniture(){
+  S.furniture.push({id:nid(),type:C.fuTypes[0],qty:'1',price:''});
+  renderFurniture(); renderTable(); renderSummary();
+}
+function renderFurniture(){
+  const tb=document.getElementById('fuBody'); if(!tb)return;
+  tb.innerHTML='';
+  S.furniture.forEach(f=>{
+    const opts=C.fuTypes.map(t=>`<option${t===f.type?' selected':''}>${t}</option>`).join('');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><select onchange="S.furniture.find(x=>x.id==='${f.id}').type=this.value;renderTable();renderSummary()">${opts}</select></td>
+      <td><input value="${f.qty||'1'}" placeholder="1" style="text-align:right" oninput="S.furniture.find(x=>x.id==='${f.id}').qty=this.value"></td>
+      <td><input value="${f.price||''}" placeholder="" style="text-align:right" oninput="fuPrice('${f.id}',this.value)"></td>
+      <td class="a"><button class="del-btn" onclick="S.furniture=S.furniture.filter(x=>x.id!=='${f.id}');renderFurniture();renderTable();renderSummary()">×</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function fuPrice(id,v){const f=S.furniture.find(x=>x.id===id);if(f){f.price=v;renderTable();renderSummary();}}
+
+// ═══════════ COSTS ═══════════
+function updateCost(key,v){ S.costs[key]=v; renderTable(); renderSummary(); }
+function updateField(key,field,v){ setF(key,field,v); renderTable(); renderSummary(); }
+
+// ═══════════ MANUAL ITEMS ═══════════
+function addManual(desc){
+  S.manuals.push({id:nid(),type:'item',desc:desc||''});
+  renderTable(); renderSummary();
+}
+function addManualGrp(){
+  S.manuals.push({id:nid(),type:'group',desc:'Additional Items'});
+  renderTable();
+}
+
+// ═══════════ TABLE ═══════════
+function specBtn(key){
+  const sp=getSp(key);
+  const hasSp=sp.wood||sp.iLam||sp.oLam||sp.shut||sp.wall;
+  const isExp=S.expanded.has(key);
+  return `<button class="exp-btn" onclick="toggleSpec('${key}')" title="Material Specs">${isExp?'▲':hasSp?'⚙✓':'⚙'}</button>`;
+}
+
+function specRow(key){
+  if(!S.expanded.has(key)) return '';
+  const sp=getSp(key);
+  const mkSel=(field,opts,cur)=>`<div class="sf"><label>${field}</label><select class="spec-s" onchange="setSp('${key}','${field}',this.value);renderTable()">${opts.map(o=>`<option${o===cur?' selected':''}>${o}</option>`).join('')}</select></div>`;
+  return `<tr class="ispec"><td colspan="6"><div class="spec-grid">
+    ${mkSel('wood',C.WOOD,sp.wood||'—')}
+    ${mkSel('iLam',C.ILAM,sp.iLam||'—')}
+    ${mkSel('oLam',C.OLAM,sp.oLam||'—')}
+    ${mkSel('shut',C.SHUT,sp.shut||'—')}
+    ${mkSel('wall',C.WALL,sp.wall||'—')}
+  </div></td></tr>`;
+}
+
+function toggleSpec(key){
+  if(S.expanded.has(key)) S.expanded.delete(key); else S.expanded.add(key);
+  renderTable();
+}
+
+function renderTable(){
+  const tb=document.getElementById('itBody'); if(!tb)return;
+  const rows=allItems();
+  let h='';
+  rows.forEach(r=>{
+    if(r.type==='group'){
+      h+=`<tr class="igrp"><td colspan="6">${esc(r.label)}</td></tr>`;
+    } else {
+      const f=getF(r.key);
+      const vv=getItemVal(r.key);
+      // desc display (for most items, use the label from allItems which has the chip name)
+      // override with user-edited desc for manual items
+      let dispDesc = r.label;
+      if(f.desc) dispDesc=f.desc;
+      // area/price display
+      let areaVal='', priceVal='';
+      if(r.key.startsWith('ap-')){ const a=S.appliances.find(x=>'ap-'+x.id===r.key); priceVal=a?a.price:''; }
+      else if(r.key.startsWith('cu-')){ const cu=S.curtains.find(x=>'cu-'+x.id===r.key); areaVal=cu?cu.measurement:''; priceVal=cu?cu.price:''; }
+      else if(r.key.startsWith('fu-')){ const f2=S.furniture.find(x=>'fu-'+x.id===r.key); priceVal=f2?f2.price:''; }
+      else if(r.key==='el-labor'){priceVal=S.costs.elL;}
+      else if(r.key==='el-material'){priceVal=S.costs.elM;}
+      else if(r.key==='pl-labor'){priceVal=S.costs.plL;}
+      else if(r.key==='pl-material'){priceVal=S.costs.plM;}
+      else if(r.key==='tl-labor'){priceVal=S.costs.tlL;}
+      else if(r.key==='tl-material'){priceVal=S.costs.tlM;}
+      else { areaVal=f.area; priceVal=f.price||f.fixed; }
+
+      const isFixed=!areaVal&&priceVal;
+      const noEdit=['ap-','cu-','fu-','el-','pl-','tl-'].some(p=>r.key.startsWith(p));
+      const areaDis=noEdit||r.key.startsWith('cu-')?'disabled':'';
+      const priceDis=noEdit?'disabled':'';
+      const areaPlc=''; const pricePlc='';
+
+      h+=`<tr>
+        <td><input value="${esc(dispDesc)}" placeholder="Description..."
+          oninput="${r.key.startsWith('mn-')?'S.manuals.find(x=>\'mn-\'+x.id===\''+r.key+'\').desc=this.value':'setF(\''+r.key+'\',\'desc\',this.value)'}"
+          ${noEdit?'readonly style=\'color:var(--muted);font-style:italic\'':''}></td>
+        <td class="${areaDis?'':'inp-cell'}"><input value="${areaVal||''}" placeholder="${areaDis?'':' '}" style="text-align:right;width:100%" 
+          oninput="onArea('${r.key}',this.value)" ${areaDis}></td>
+        <td class="${priceDis?'':'inp-cell'}"><input value="${priceVal||''}" placeholder="${priceDis?'':' '}" style="text-align:right;width:100%"
+          oninput="onPrice('${r.key}',this.value)" ${priceDis}></td>
+        <td class="val" id="vc-${r.key}">${vv>0?fmtINR(vv):'—'}</td>
+        <td style="padding:4px 6px;vertical-align:middle">${specBtn(r.key)}</td>
+        <td class="act"><button class="del-btn" onclick="delItem('${r.key}','${r.group}')">×</button></td>
+      </tr>${specRow(r.key)}`;
+    }
+  });
+  tb.innerHTML=h;
+
+  // Totals
+  const tot=document.getElementById('itTotals'); if(!tot)return;
+  const sub=subtotal(), disc=discAmt(), gt=grandTotal(), gst=gt*0.18;
+  let th=`<tr class="sub-r">
+    <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Sub Total</td>
+    <td class="val" style="background:#fdf7ee;font-size:13px;color:var(--acc)">${fmtINR(sub)}</td><td></td><td></td>
+  </tr>`;
+  if(S.disc>0){
+    th+=`<tr class="disc-r">
+      <td colspan="3" style="text-align:right;font-size:11px">Discount (${S.disc}%)</td>
+      <td class="val" style="background:#fff5f5;color:var(--red)">– ${fmtINR(disc)}</td><td></td><td></td>
+    </tr>`;
+  }
+  th+=`<tr class="gt-r">
+    <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Grand Total</td>
+    <td style="text-align:right;background:#252525;padding:10px 9px;font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold)">${fmtINR(gt)}</td><td style="background:#252525"></td><td style="background:#252525"></td>
+  </tr>
+  <tr class="gst-r">
+    <td colspan="2">Billing inclusive of GST @18%</td>
+    <td style="text-align:right">GST Component</td>
+    <td class="val" style="background:#f0ebe0">${fmtINR(gst)}</td><td></td><td></td>
+  </tr>`;
+  tot.innerHTML=th;
+
+  // Update badge
+  document.getElementById('badge').textContent = gt>0 ? fmtINR(gt)+' (incl. GST '+fmtINR(gst)+')' : '';
+  renderSummary();
+}
+
+function onArea(key,v){
+  if(key.startsWith('cu-')){ const cu=S.curtains.find(x=>'cu-'+x.id===key); if(cu){cu.measurement=v; refreshValCell(key);} }
+  else {
+    setF(key,'area',v);
+    // If area cleared, also clear computed price
+    if(!v){ setF(key,'price',''); }
+    refreshValCell(key);
+  }
+}
+function onPrice(key,v){
+  const f = getF(key);
+  if(v === '' || v === null){
+    setF(key,'price','');
+    setF(key,'fixed','');
+  } else {
+    setF(key, f.area ? 'price' : 'fixed', v);
+  }
+  refreshValCell(key);
+}
+function refreshValCell(key){
+  // Update only the value cell — no DOM rebuild, cursor stays put
+  const el=document.getElementById('vc-'+key);
+  if(el){ const vv=getItemVal(key); el.textContent=vv>0?fmtINR(vv):'—'; }
+  updateTotalsOnly();
+}
+function updateTotalsOnly(){
+  const sub=subtotal(), disc=discAmt(), gt=grandTotal(), gst=gt*0.18;
+  const tot=document.getElementById('itTotals'); if(!tot)return;
+  let th=`<tr class="sub-r">
+    <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Sub Total</td>
+    <td class="val" style="background:#fdf7ee;font-size:13px;color:var(--acc)">${fmtINR(sub)}</td><td></td><td></td>
+  </tr>`;
+  if(S.disc>0){
+    th+=`<tr class="disc-r">
+      <td colspan="3" style="text-align:right;font-size:11px">Discount (${S.disc}%)</td>
+      <td class="val" style="background:#fff5f5;color:var(--red)">– ${fmtINR(disc)}</td><td></td><td></td>
+    </tr>`;
+  }
+  th+=`<tr class="gt-r">
+    <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Grand Total</td>
+    <td style="text-align:right;background:#252525;padding:10px 9px;font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold)">${fmtINR(gt)}</td><td style="background:#252525"></td><td style="background:#252525"></td>
+  </tr>
+  <tr class="gst-r">
+    <td colspan="2">Billing inclusive of GST @18%</td>
+    <td style="text-align:right">GST Component</td>
+    <td class="val" style="background:#f0ebe0">${fmtINR(gst)}</td><td></td><td></td>
+  </tr>`;
+  tot.innerHTML=th;
+  document.getElementById('badge').textContent = gt>0 ? fmtINR(gt)+' (incl. GST '+fmtINR(gst)+')' : '';
+  // update discount preview in cfg strip
+  if(S.disc>0){ const pre=document.getElementById('discPre'); if(pre&&disc>0)pre.textContent='–'+fmtINR(disc); }
+  renderSummary();
+}
+
+function delItem(key,group){
+  // Remove from the relevant source
+  if(group==='br'){ const m=key.match(/^br(\d+)-(.+)$/); if(m){const i=+m[1],c=m[2].replace(/_/g,' ');toggleChip(S.brChips[i],c);renderBR();} }
+  else if(group==='lv'){ const c=key.replace('lv-','').replace(/_/g,' '); toggleChip(S.lvChips,c); renderRoomChips('lvChips',C.lvChips,S.lvChips,lv=>{}); }
+  else if(group==='da'){ const c=key.replace('da-','').replace(/_/g,' '); toggleChip(S.daChips,c); renderRoomChips('daChips',C.daChips,S.daChips,da=>{}); }
+  else if(group==='pr'){ const c=key.replace('pr-','').replace(/_/g,' '); toggleChip(S.prChips,c); renderRoomChips('prChips',C.prChips,S.prChips,pr=>{}); }
+  else if(group==='fe'){ const c=key.replace('fe-','').replace(/_/g,' '); toggleChip(S.feChips,c); renderRoomChips('feChips',C.feChips,S.feChips,fe=>{}); }
+  else if(group==='wr'){ const m=key.match(/^wr(.+?)-(.+)$/); if(m){const r=S.washRooms.find(x=>x.id===m[1]);if(r){toggleChip(r.chips,m[2].replace(/_/g,' '));renderRoomCards('wr');}}}
+  else if(group==='kt'){ const m=key.match(/^kt(.+?)-(.+)$/); if(m){const r=S.kitchens.find(x=>x.id===m[1]);if(r){toggleChip(r.chips,m[2].replace(/_/g,' '));renderRoomCards('kt');}}}
+  else if(group==='ba'){ const m=key.match(/^ba(.+?)-(.+)$/); if(m){const r=S.balconies.find(x=>x.id===m[1]);if(r){toggleChip(r.chips,m[2].replace(/_/g,' '));renderRoomCards('ba');}}}
+  else if(group==='ap'){ S.appliances=S.appliances.filter(x=>'ap-'+x.id!==key); renderAppliances(); }
+  else if(group==='cu'){ S.curtains=S.curtains.filter(x=>'cu-'+x.id!==key); renderCurtains(); }
+  else if(group==='fu'){ S.furniture=S.furniture.filter(x=>'fu-'+x.id!==key); renderFurniture(); }
+  else if(group==='mn'){ const mid=key.replace('mn-',''); S.manuals=S.manuals.filter(x=>x.id!==mid); }
+  else if(key==='ut'){ S.iF['ut']={area:'',price:'',fixed:'',desc:''}; document.getElementById('utA').value=''; document.getElementById('utP').value=''; }
+  else if(key==='fc'){ S.fcType=''; renderFCTypes(); }
+  delete S.iF[key]; delete S.iSp[key]; S.expanded.delete(key);
+  renderTable(); renderSummary();
+}
+
+// ═══════════ SUMMARY ═══════════
+function renderSummary(){
+  const name=gv('cname'),pname=gv('pname'),cfg=gv('pcfg'),area=gv('builtup');
+  const phone=gv('cphone'),addr=gv('caddr');
+  const p1=fv('p1p'),p2=fv('p2p'),p3=fv('p3p');
+  const p1n=gv('p1n'),p2n=gv('p2n'),p3n=gv('p3n');
+  const sub=subtotal(),disc=discAmt(),gt=grandTotal(),gst=gt*0.18;
+  const el=document.getElementById('sumContent');
+
+  if(!name&&gt===0){el.innerHTML='<div class="se">Fill in client details and select room items to see the live preview.</div>';return;}
+
+  let h=`<div style="margin-bottom:6px"><span class="wbadge">${S.work}</span></div>`;
+  h+=`<div><div class="slim">Client</div>
+    <div class="sname">${esc(name)||'—'}</div>
+    ${[pname,cfg,area?area+' Sft':''].filter(Boolean).length?`<div class="smeta">${[esc(pname),esc(cfg),area?area+' Sft':''].filter(Boolean).join(' · ')}</div>`:''}
+    ${phone?`<div class="smeta">${esc(phone)}</div>`:''}
+    ${addr?`<div class="smeta">${esc(addr)}</div>`:''}
+  </div><hr class="sdv">`;
+
+  if(gt>0){
+    const lis=allItems().filter(r=>r.type==='item'&&getItemVal(r.key)>0);
+    if(lis.length){
+      h+=`<div><div class="slim">${lis.length} Item${lis.length>1?'s':''}</div>`;
+      lis.slice(0,7).forEach(r=>{ h+=`<div class="sli"><span class="n">${esc(r.label)}</span><span class="a">${fmtINR(getItemVal(r.key))}</span></div>`; });
+      if(lis.length>7) h+=`<div style="font-size:10px;color:#4a4744;padding:2px 0">+ ${lis.length-7} more…</div>`;
+      h+=`</div>`;
+    }
+    if(S.disc>0) h+=`<div class="sli red"><span class="n">Discount (${S.disc}%)</span><span class="a">– ${fmtINR(disc)}</span></div>`;
+    h+=`<div class="stot">
+      <div class="stot-l">Grand Total</div>
+      <div class="stot-v">${fmtINR(gt)}</div>
+      <div class="stot-n">GST @18% = ${fmtINR(gst)} · Inclusive in billing</div>
+    </div>`;
+    if(p1||p2||p3){
+      h+=`<hr class="sdv"><div><div class="slim">Payment</div>`;
+      [[p1,p1n],[p2,p2n],[p3,p3n]].filter(r=>r[0]>0).forEach(([pct,nm],i)=>{
+        h+=`<div class="spay"><span class="pn">Stage ${i+1} · ${pct}%</span><span class="pa">${fmtINR(gt*pct/100)}</span></div>`;
+      });
+      h+=`</div>`;
+    }
+  }
+  el.innerHTML=h;
+}
+
+// ═══════════ PDF ═══════════
+function genPDF(){
+  const name=gv('cname'),pname=gv('pname'),cfg=gv('pcfg'),area=gv('builtup');
+  const phone=gv('cphone'),email=gv('cemail'),addr=gv('caddr'),cons=gv('cons');
+  const qdate=gv('qdate'),qvalid=gv('qvalid'),terms=gv('terms');
+  const p1=fv('p1p'),p2=fv('p2p'),p3=fv('p3p');
+  const p1n=gv('p1n'),p2n=gv('p2n'),p3n=gv('p3n');
+  const sub=subtotal(),disc=discAmt(),gt=grandTotal(),gst=gt*0.18;
+  const ref='SS-'+Date.now().toString().slice(-6);
+  const dateFmt=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
+  const today=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+  const rows=allItems();
+  let rowsH='';
+  rows.forEach(r=>{
+    if(r.type==='group'){
+      rowsH+=`<tr><td colspan="4" style="background:#1c1c1c;color:#f5f0e8;padding:8px 14px;font-size:9px;letter-spacing:3px;text-transform:uppercase">${esc(r.label)}</td></tr>`;
+    } else {
+      const vv=getItemVal(r.key);
+      const f=getF(r.key);
+      const sp=getSp(r.key);
+      const specTxt=[
+        sp.wood&&sp.wood!=='—'?'Wood: '+sp.wood:'',
+        sp.iLam&&sp.iLam!=='—'?'Inner Lam: '+sp.iLam:'',
+        sp.oLam&&sp.oLam!=='—'?'Outer Lam: '+sp.oLam:'',
+        sp.shut&&sp.shut!=='—'?'Shutter: '+sp.shut:'',
+        sp.wall&&sp.wall!=='—'?'Wall Protection: '+sp.wall:'',
+      ].filter(Boolean).join(' | ');
+      let aDisplay='—', pDisplay='—';
+      if(r.key.startsWith('ap-')){ const a=S.appliances.find(x=>'ap-'+x.id===r.key); pDisplay=a&&a.price?fmtINR(parseFloat(a.price)):'—'; }
+      else if(r.key.startsWith('cu-')){ const cu=S.curtains.find(x=>'cu-'+x.id===r.key); aDisplay=cu&&cu.measurement?cu.measurement+' Sft':'—'; pDisplay=cu&&cu.price?fmtINR(parseFloat(cu.price))+'/Sft':'—'; }
+      else if(r.key.startsWith('fu-')){ const fu=S.furniture.find(x=>'fu-'+x.id===r.key); pDisplay=fu&&fu.price?fmtINR(parseFloat(fu.price)):'—'; }
+      else if(['el-labor','el-material','pl-labor','pl-material','tl-labor','tl-material'].includes(r.key)){ pDisplay=fmtINR(getItemVal(r.key)); }
+      else { aDisplay=f.area||'—'; pDisplay=f.price?fmtINR(parseFloat(f.price)):(f.fixed?'Lump Sum':'—'); }
+      rowsH+=`<tr style="border-bottom:1px solid #ece7dc">
+        <td style="padding:8px 14px">${esc(r.label)}${specTxt?`<br><span style="font-size:10px;color:#8a8070">${esc(specTxt)}</span>`:''}</td>
+        <td style="padding:8px 14px;text-align:right">${aDisplay}</td>
+        <td style="padding:8px 14px;text-align:right">${pDisplay}</td>
+        <td style="padding:8px 14px;text-align:right;font-weight:500">${vv>0?fmtINR(vv):'—'}</td>
+      </tr>`;
+    }
+  });
+
+  let payH='';
+  [[p1,p1n],[p2,p2n],[p3,p3n]].filter(r=>r[0]>0).forEach(([pct,nm],i)=>{
+    payH+=`<tr style="background:${i%2===0?'white':'#faf7f2'}">
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;font-weight:500">Stage ${i+1}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;color:#5a5550">${esc(nm)}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;text-align:right">${pct}%</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;text-align:right;font-weight:600;color:#b8864a">${fmtINR(gt*pct/100)}</td>
+    </tr>`;
+  });
+
+  const termLines=(terms||'').split('\n').filter(l=>l.trim()).map(l=>`<div style="padding:4px 0;color:#5a5550;font-size:12px;border-bottom:1px solid #f0ebe0">${esc(l.trim())}</div>`).join('');
+  const LOGO='https://static.wixstatic.com/media/9919c1_463c56997d8b464b8d3c08a87b2fd75e~mv2.png/v1/crop/x_0,y_0,w_285,h_150/fill/w_200,h_106,al_c,q_85,enc_avif,quality_auto/Untitled%20design.png';
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Space Studio – Quotation ${ref}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.w{max-width:820px;margin:0 auto}
+.hdr{background:#ffffff;border-bottom:1px solid #e0d8cc;padding:22px 36px;display:flex;justify-content:space-between;align-items:center}
+.hdr-c{text-align:right;font-size:10px;color:#8a8070;line-height:1.8;margin-top:4px}
+.hdr-c a{color:#c8973a;text-decoration:none}
+.ab{height:4px;background:linear-gradient(90deg,#c8973a,#e0b96a 50%,#c8973a)}
+.tb{background:#1c1c1c;padding:10px 36px;display:flex;align-items:center;gap:12px}
+.wbadge{background:#1c1c1c;color:#c8973a;padding:3px 11px;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600}
+.ds{background:#f5f0e8;padding:13px 36px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd5c4}
+.dt{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;letter-spacing:2px}
+.dm{font-size:10px;color:#8a8070;text-align:right;line-height:1.9}
+.cg{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd5c4;margin:22px 36px 0}
+.cb2{padding:17px 19px}
+.cb2:first-child{border-right:1px solid #ddd5c4}
+.bh{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#c8973a;margin-bottom:9px;font-weight:500}
+.ci{margin-bottom:5px}
+.cl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8a8070;margin-bottom:2px}
+.cv{font-size:13px}.cv.big{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400}.cv.hi{font-size:17px;font-weight:600;color:#b8864a}
+.sec{margin:22px 36px 0}
+.st{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;letter-spacing:1px;padding-bottom:7px;border-bottom:2px solid #c8973a;display:inline-block;margin-bottom:14px}
+.stbl{width:100%;border-collapse:collapse;font-size:12px}
+.stbl thead tr{background:#1c1c1c}
+.stbl th{color:#f5f0e8;padding:9px 14px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500}
+.stbl th.r{text-align:right}
+.stbl tr:nth-child(even) td{background:#faf7f2}
+.sub-r td{background:#fdf7ee;padding:8px 14px;font-weight:600;border-top:2px solid #c8973a}
+.disc-r td{background:#fff5f5;padding:7px 14px;color:#c0392b}
+.gt-r td{background:#1c1c1c;color:#f5f0e8;padding:11px 14px;font-weight:500}
+.gst-r td{background:#f0ebe0;padding:7px 14px;font-size:11px;color:#8a8070}
+.ptbl{width:100%;border-collapse:collapse;font-size:12px}
+.ptbl thead tr{background:#c8973a}
+.ptbl th{color:white;padding:9px 14px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500}
+.ptbl th.r{text-align:right}
+.mt{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #ddd5c4}
+.mt tr:nth-child(even) td{background:#faf7f2}
+.mt td{padding:8px 14px;border-bottom:1px solid #ece7dc}
+.mt td:first-child{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#8a8070;background:#faf7f2;width:158px;font-weight:500;border-right:1px solid #ddd5c4}
+.ftr{background:#1c1c1c;color:#6a6560;padding:17px 36px;display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-top:28px}
+.fb{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;letter-spacing:5px;text-transform:uppercase;color:#f5f0e8}
+.ft{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#c8973a}
+.no-p{background:#ece7dc;text-align:center;padding:20px}
+@media print{@page{margin:0;size:A4}.no-p{display:none}}
+</style></head><body><div class="w">
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:0">
+    <img src="${LOGO}" style="height:58px;display:block" 
+         onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+    <div style="display:none;align-items:center;gap:8px">
+      <div style="width:48px;height:48px;background:#c8973a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:white">S</div>
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;letter-spacing:5px;text-transform:uppercase;color:#1c1c1c">Space Studio</div>
+        <div style="font-size:9px;letter-spacing:3px;color:#c8973a;text-transform:uppercase">Interiors</div>
+      </div>
+    </div>
+  </div>
+  <div class="hdr-c">
+    99675 99679 &nbsp;|&nbsp; 93918 99949<br>
+    info@spacestudiointeriors.com<br>
+    www.spacestudio.in<br>
+    <span style="color:#aaa090">Vijayawada · Hyderabad · Guntur · Amaravati</span>
+  </div>
+</div>
+<div class="ab"></div>
+<div class="tb">
+  <span class="wbadge">${esc(S.work)}</span>
+  ${S.disc>0?`<span style="background:rgba(192,57,43,0.2);color:#ff8070;border:1px solid rgba(192,57,43,0.4);padding:3px 11px;font-size:9px;letter-spacing:2px;text-transform:uppercase">Discount: ${S.disc}% (– ${fmtINR(disc)})</span>`:''}
+</div>
+<div class="ds">
+  <div class="dt">Interior Design Quotation</div>
+  <div class="dm">
+    <strong style="color:#1c1c1c;font-size:12px">Ref: ${ref}</strong><br>
+    Date: ${qdate?dateFmt(qdate):today}<br>
+    ${qvalid?`Valid Till: ${dateFmt(qvalid)}`:'Valid: 30 days'}
+    ${cons?`<br>Consultant: ${esc(cons)}`:''}
+  </div>
+</div>
+<div class="cg">
+  <div class="cb2">
+    <div class="bh">Client Details</div>
+    <div class="ci"><div class="cl">Name</div><div class="cv big">${esc(name)||'—'}</div></div>
+    ${phone?`<div class="ci"><div class="cl">Phone</div><div class="cv">${esc(phone)}</div></div>`:''}
+    ${email?`<div class="ci"><div class="cl">Email</div><div class="cv">${esc(email)}</div></div>`:''}
+    ${addr?`<div class="ci"><div class="cl">Address</div><div class="cv">${esc(addr)}</div></div>`:''}
+  </div>
+  <div class="cb2">
+    <div class="bh">Project Details</div>
+    ${pname?`<div class="ci"><div class="cl">Project</div><div class="cv big">${esc(pname)}</div></div>`:''}
+    ${cfg?`<div class="ci"><div class="cl">Configuration</div><div class="cv">${esc(cfg)}</div></div>`:''}
+    ${area?`<div class="ci"><div class="cl">Built-up Area</div><div class="cv">${esc(area)} Sq.ft</div></div>`:''}
+    <div class="ci" style="margin-top:7px"><div class="cl">Grand Total</div><div class="cv hi">${fmtINR(gt)}</div></div>
+    <div style="font-size:10px;color:#8a8070;margin-top:2px">Inclusive of GST @18% (= ${fmtINR(gst)})</div>
+  </div>
+</div>
+<div class="sec">
+  <div class="st">Scope of Work & Pricing</div>
+  <table class="stbl">
+    <thead><tr>
+      <th style="width:43%">Description</th>
+      <th class="r" style="width:15%">Area / Qty</th>
+      <th class="r" style="width:21%">Rate (₹)</th>
+      <th class="r" style="width:21%">Value (₹)</th>
+    </tr></thead>
+    <tbody>
+      ${rowsH}
+      <tr class="sub-r"><td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Sub Total</td><td style="text-align:right">${fmtINR(sub)}</td></tr>
+      ${S.disc>0?`<tr class="disc-r"><td colspan="3" style="text-align:right">Discount (${S.disc}%)</td><td style="text-align:right">– ${fmtINR(disc)}</td></tr>`:''}
+      <tr class="gt-r"><td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Grand Total</td><td style="text-align:right;font-family:'Cormorant Garamond',serif;font-size:21px;color:#c8973a">${fmtINR(gt)}</td></tr>
+      <tr class="gst-r"><td colspan="2">Billing inclusive of GST @18%</td><td style="text-align:right">GST Component</td><td style="text-align:right">${fmtINR(gst)}</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sec">
+  <div class="st">Materials & Specifications</div>
+  <table class="mt">
+    <tr><td>Type of Work</td><td>${esc(gv('mWork'))}</td></tr>
+    <tr><td>Finish</td><td>${esc(gv('mFin'))}</td></tr>
+    <tr><td>Plywood</td><td>${esc(gv('mPly'))}</td></tr>
+    <tr><td>Hardware</td><td>${esc(gv('mHw'))}</td></tr>
+    <tr><td>Laminate</td><td>${esc(gv('mLam'))}</td></tr>
+    <tr><td>Customisation</td><td>${esc(gv('mCust'))}</td></tr>
+    <tr><td>Glass</td><td>${esc(gv('mGlass'))}</td></tr>
+  </table>
+</div>
+${payH?`<div class="sec"><div class="st">Payment Schedule</div>
+  <table class="ptbl"><thead><tr><th>Stage</th><th>Milestone</th><th class="r">%</th><th class="r">Amount (₹)</th></tr></thead>
+  <tbody>${payH}</tbody></table></div>`:''}
+${termLines?`<div class="sec"><div class="st">Terms & Conditions</div><div style="border:1px solid #ddd5c4;padding:4px 14px">${termLines}</div></div>`:''}
+<div class="ftr">
+  <div><div class="fb">Space Studio Interiors</div>
+  <div style="font-size:10px;color:#5a5550;margin-top:2px">99675 99679 · 93918 99949 · info@spacestudiointeriors.com · www.spacestudio.in</div></div>
+  <div class="ft">We Elevate Your Space</div>
+</div>
+<div class="no-p">
+  <p style="font-size:12px;color:#6b6560"><strong>Ctrl+P</strong> → <strong>Save as PDF</strong> → Margins: <strong>None</strong></p>
+  <button onclick="window.print()" style="background:#1c1c1c;color:white;border:none;padding:9px 26px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:9px">Print / Save as PDF</button>
+</div>
+</div></body></html>`;
+
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`SpaceStudio_Quote_${(name||'Client').replace(/\s+/g,'_')}_${ref}.html`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+
+// ═══════════ INIT ═══════════
+document.addEventListener('DOMContentLoaded',()=>{
+  const t=new Date();
+  document.getElementById('qdate').value=t.toISOString().split('T')[0];
+  const vd=new Date(t); vd.setDate(vd.getDate()+30);
+  document.getElementById('qvalid').value=vd.toISOString().split('T')[0];
+
+  // Living room chips
+  renderRoomChips('lvChips',C.lvChips,S.lvChips,c=>{toggleChip(S.lvChips,c);renderRoomChips('lvChips',C.lvChips,S.lvChips,arguments.callee);renderTable();renderSummary();});
+  // Hack: re-bind with closures
+  function bindChips(elId,list,arr){ renderRoomChips(elId,list,arr, c=>{toggleChip(arr,c);bindChips(elId,list,arr);renderTable();renderSummary();}); }
+  bindChips('lvChips',C.lvChips,S.lvChips);
+  bindChips('daChips',C.daChips,S.daChips);
+  bindChips('prChips',C.prChips,S.prChips);
+  bindChips('feChips',C.feChips,S.feChips);
+
+  renderBR();
+  renderFCTypes();
+  renderTable();
+  renderSummary();
+});
+</script>
+</body>
+</html>
