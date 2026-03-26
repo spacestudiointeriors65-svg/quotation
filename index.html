@@ -178,7 +178,8 @@ textarea{resize:vertical;min-height:56px}
   </div>
   <div style="display:flex;align-items:center;gap:12px">
     <span id="badge" style="font-size:11px;color:var(--gold)"></span>
-    <button class="btn-dl" onclick="genPDF()">↓ Download Quotation</button>
+    <button class="btn-dl" onclick="genPDF()" style="background:#555;color:#f5f0e8" title="Full line-item detail for internal use">↓ Internal Copy</button>
+    <button class="btn-dl" onclick="genCustomerPDF()" title="Clean room-summary for sharing with client">↓ Customer Copy</button>
   </div>
   <div class="hdr-ab"></div>
 </div>
@@ -247,10 +248,13 @@ textarea{resize:vertical;min-height:56px}
       <div class="chips" id="brChips"></div>
     </div>
 
-    <!-- Living Room -->
+    <!-- Living Rooms -->
     <div class="ss">
-      <div class="ss-h"><span class="ss-t">Living Room</span></div>
-      <div class="chips" id="lvChips"></div>
+      <div class="ss-h">
+        <span class="ss-t">Living Room(s)</span>
+        <button class="add-btn" onclick="addRoom('lv')">+ Add Living Room</button>
+      </div>
+      <div id="lvCards"></div>
     </div>
 
     <!-- Dining Area -->
@@ -482,7 +486,7 @@ const C = {
   lvChips: ['TV Unit','Wall Panelling','Wall Art','Partition – Wooden','Partition – PVC','Console Unit','Others'],
   daChips: ['Crockery Unit','Bar Counter','Vanity','Dining Partition'],
   prChips: ['Inner Cabinet','Outer Cabinet','Glass Work','Doors','Antic Items'],
-  wrChips: ['Vanity','Dry Area','Wet Area','Others'],
+  wrChips: ['Vanity','Wet & Dry Area','Others'],
   ktChips: ['Base Cabinets','Wall Units','Loft','Pantry Unit','Oven Unit','Shutter','Tall Unit','Breakfast Counter'],
   baChips: ['Sit Out','Wall Claddings','Safety Grills'],
   feChips: ['Door Panelling','Shoe Rack','Safety Grills'],
@@ -507,7 +511,7 @@ let S = {
   brCount: 3, brActive: 0,
   brNames: [...C.brLabels],
   brChips: [[],[],[],[],[],[]],
-  lvChips: [], daChips: [], prChips: [], feChips: [],
+  livingRooms: [], daChips: [], prChips: [], feChips: [],
   fcType: '',
   washRooms: [], kitchens: [], balconies: [],
   appliances: [], curtains: [], furniture: [],
@@ -547,8 +551,8 @@ function allItems() {
       S.brChips[i].forEach(c => add('item','br'+i+'-'+c.replace(/\s/g,'_'), C.brShort[i]+' – '+c, 'br'));
     }
   }
-  // Living
-  if(S.lvChips.length>0){ add('group','grp-lv','Living Room'); S.lvChips.forEach(c=>add('item','lv-'+c.replace(/\s/g,'_'),'Living Room – '+c,'lv')); }
+  // Living Rooms
+  S.livingRooms.forEach(r=>{ if(r.chips.length>0){ add('group','grp-lv'+r.id,r.name); r.chips.forEach(c=>add('item','lv'+r.id+'-'+c.replace(/\s/g,'_'),r.name+' – '+c,'lv')); } });
   // Dining
   if(S.daChips.length>0){ add('group','grp-da','Dining Area'); S.daChips.forEach(c=>add('item','da-'+c.replace(/\s/g,'_'),'Dining Area – '+c,'da')); }
   // Pooja
@@ -677,23 +681,25 @@ function setActiveBR(i){ S.brActive=i; renderBR(); }
 
 // ═══════════ ADDABLE ROOMS ═══════════
 function addRoom(type){
-  const id=nid(), name=type==='wr'?'Wash Room':type==='kt'?'Kitchen':'Balcony';
+  const id=nid(), name=type==='wr'?'Wash Room':type==='kt'?'Kitchen':type==='lv'?'Living Room':'Balcony';
   const room={id, name, chips:[]};
   if(type==='wr') S.washRooms.push(room);
   else if(type==='kt') S.kitchens.push(room);
+  else if(type==='lv') S.livingRooms.push(room);
   else S.balconies.push(room);
   renderRoomCards(type); renderTable(); renderSummary();
 }
 function removeRoom(type,id){
   if(type==='wr') S.washRooms=S.washRooms.filter(r=>r.id!==id);
   else if(type==='kt') S.kitchens=S.kitchens.filter(r=>r.id!==id);
+  else if(type==='lv') S.livingRooms=S.livingRooms.filter(r=>r.id!==id);
   else S.balconies=S.balconies.filter(r=>r.id!==id);
   renderRoomCards(type); renderTable(); renderSummary();
 }
 function renderRoomCards(type){
-  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:S.balconies;
-  const elId=type==='wr'?'wrCards':type==='kt'?'ktCards':'baCards';
-  const chips=type==='wr'?C.wrChips:type==='kt'?C.ktChips:C.baChips;
+  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:type==='lv'?S.livingRooms:S.balconies;
+  const elId=type==='wr'?'wrCards':type==='kt'?'ktCards':type==='lv'?'lvCards':'baCards';
+  const chips=type==='wr'?C.wrChips:type==='kt'?C.ktChips:type==='lv'?C.lvChips:C.baChips;
   const el=document.getElementById(elId); if(!el)return;
   el.innerHTML='';
   arr.forEach(room=>{
@@ -712,11 +718,11 @@ function renderRoomCards(type){
   });
 }
 function renameRoom(type,id,name){
-  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:S.balconies;
+  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:type==='lv'?S.livingRooms:S.balconies;
   const r=arr.find(x=>x.id===id); if(r){r.name=name; renderTable(); renderSummary();}
 }
 function toggleRoomChip(type,id,chip){
-  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:S.balconies;
+  const arr=type==='wr'?S.washRooms:type==='kt'?S.kitchens:type==='lv'?S.livingRooms:S.balconies;
   const r=arr.find(x=>x.id===id); if(!r)return;
   toggleChip(r.chips,chip);
   renderRoomCards(type); renderTable(); renderSummary();
@@ -744,9 +750,10 @@ function renderAppliances(){
   S.appliances.forEach(a=>{
     const tr=document.createElement('tr');
     const opts=C.apTypes.map(t=>`<option${t===a.type?' selected':''}>${t}</option>`).join('');
+    const roomOpts=getRoomList().map(r=>`<option value="${esc(r)}"${r===a.room?' selected':''}>${r}</option>`).join('');
     tr.innerHTML=`
       <td><select onchange="S.appliances.find(x=>x.id==='${a.id}').type=this.value;renderTable();renderSummary()">${opts}</select></td>
-      <td><input value="${esc(a.brand||'')}" placeholder="Brand / Model" oninput="S.appliances.find(x=>x.id==='${a.id}').brand=this.value"></td>
+      <td><select onchange="S.appliances.find(x=>x.id==='${a.id}').room=this.value;renderSummary()" style="font-size:11px"><option value="">— Room —</option>${roomOpts}</select></td>
       <td><input value="${a.price||''}" placeholder="" style="text-align:right" oninput="apPrice('${a.id}',this.value)"></td>
       <td class="a"><button class="del-btn" onclick="S.appliances=S.appliances.filter(x=>x.id!=='${a.id}');renderAppliances();renderTable();renderSummary()">×</button></td>`;
     tb.appendChild(tr);
@@ -765,8 +772,10 @@ function renderCurtains(){
   S.curtains.forEach(cu=>{
     const val=(parseFloat(cu.measurement)||0)*(parseFloat(cu.price)||0);
     const tr=document.createElement('tr');
+    const roomOptsCu=getRoomList().map(r=>`<option value="${esc(r)}"${r===(cu.room||'')?` selected`:``}>${r}</option>`).join('');
     tr.innerHTML=`
-      <td><input value="${esc(cu.item||'')}" placeholder="e.g. Living Room" oninput="S.curtains.find(x=>x.id==='${cu.id}').item=this.value;renderTable();renderSummary()"></td>
+      <td><input value="${esc(cu.item||'')}" placeholder="e.g. Curtain description" oninput="S.curtains.find(x=>x.id==='${cu.id}').item=this.value;renderTable();renderSummary()"></td>
+      <td><select onchange="S.curtains.find(x=>x.id==='${cu.id}').room=this.value;renderSummary()" style="font-size:11px;width:100%"><option value="">— Room —</option>${roomOptsCu}</select></td>
       <td><input value="${cu.measurement||''}" placeholder="Sft" style="text-align:right" oninput="cuField('${cu.id}','measurement',this.value)"></td>
       <td><input value="${cu.price||''}" placeholder="Rate" style="text-align:right" oninput="cuField('${cu.id}','price',this.value)"></td>
       <td class="v">${val>0?fmtINR(val):'—'}</td>
@@ -786,10 +795,11 @@ function renderFurniture(){
   tb.innerHTML='';
   S.furniture.forEach(f=>{
     const opts=C.fuTypes.map(t=>`<option${t===f.type?' selected':''}>${t}</option>`).join('');
+    const roomOptsFu=getRoomList().map(r=>`<option value="${esc(r)}"${r===f.room?' selected':''}>${r}</option>`).join('');
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td><select onchange="S.furniture.find(x=>x.id==='${f.id}').type=this.value;renderTable();renderSummary()">${opts}</select></td>
-      <td><input value="${f.qty||'1'}" placeholder="1" style="text-align:right" oninput="S.furniture.find(x=>x.id==='${f.id}').qty=this.value"></td>
+      <td><select onchange="S.furniture.find(x=>x.id==='${f.id}').room=this.value;renderSummary()" style="font-size:11px"><option value="">— Room —</option>${roomOptsFu}</select></td>
       <td><input value="${f.price||''}" placeholder="" style="text-align:right" oninput="fuPrice('${f.id}',this.value)"></td>
       <td class="a"><button class="del-btn" onclick="S.furniture=S.furniture.filter(x=>x.id!=='${f.id}');renderFurniture();renderTable();renderSummary()">×</button></td>`;
     tb.appendChild(tr);
@@ -972,7 +982,7 @@ function updateTotalsOnly(){
 function delItem(key,group){
   // Remove from the relevant source
   if(group==='br'){ const m=key.match(/^br(\d+)-(.+)$/); if(m){const i=+m[1],c=m[2].replace(/_/g,' ');toggleChip(S.brChips[i],c);renderBR();} }
-  else if(group==='lv'){ const c=key.replace('lv-','').replace(/_/g,' '); toggleChip(S.lvChips,c); renderRoomChips('lvChips',C.lvChips,S.lvChips,lv=>{}); }
+  else if(group==='lv'){ const m=key.match(/^lv(.+?)-(.+)$/); if(m){const r=S.livingRooms.find(x=>x.id===m[1]);if(r){toggleChip(r.chips,m[2].replace(/_/g,' '));renderRoomCards('lv');}}}
   else if(group==='da'){ const c=key.replace('da-','').replace(/_/g,' '); toggleChip(S.daChips,c); renderRoomChips('daChips',C.daChips,S.daChips,da=>{}); }
   else if(group==='pr'){ const c=key.replace('pr-','').replace(/_/g,' '); toggleChip(S.prChips,c); renderRoomChips('prChips',C.prChips,S.prChips,pr=>{}); }
   else if(group==='fe'){ const c=key.replace('fe-','').replace(/_/g,' '); toggleChip(S.feChips,c); renderRoomChips('feChips',C.feChips,S.feChips,fe=>{}); }
@@ -1031,6 +1041,146 @@ function renderSummary(){
     }
   }
   el.innerHTML=h;
+}
+
+// ═══════════ ROOM LIST HELPER ═══════════
+function getRoomList() {
+  const rooms = [];
+  for(let i=0;i<S.brCount;i++) rooms.push(S.brNames[i]);
+  S.livingRooms.forEach(r=>rooms.push(r.name));
+  rooms.push('Dining Area');
+  rooms.push('Pooja Room');
+  S.washRooms.forEach(r=>rooms.push(r.name));
+  S.kitchens.forEach(r=>rooms.push(r.name));
+  S.balconies.forEach(r=>rooms.push(r.name));
+  rooms.push('Front Elevation');
+  rooms.push('Utility');
+  rooms.push('False Ceiling');
+  rooms.push('General / Common');
+  return rooms;
+}
+
+
+// ═══════════ SPEC SUMMARY BUILDER ═══════════
+function buildSpecSummary() {
+  // Collect all items grouped by room/section
+  const allRows = allItems();
+  
+  // Group items by their group label
+  const groups = []; // [{roomName, items:[{label, sp}]}]
+  let currentGroup = null;
+
+  allRows.forEach(r => {
+    if(r.type === 'group') {
+      currentGroup = { roomName: r.label, items: [] };
+      groups.push(currentGroup);
+    } else if(r.type === 'item' && currentGroup) {
+      const sp = getSp(r.key);
+      const hasSpec = sp.wood||sp.iLam||sp.oLam||sp.shut||sp.wall;
+      if(hasSpec) currentGroup.items.push({ label: r.label.replace(/^[^–]+ – /, ''), sp });
+    }
+  });
+
+  // Filter out groups with no spec items
+  const filledGroups = groups.filter(g => g.items.length > 0);
+  if(filledGroups.length === 0) return '';
+
+  const specFields = [
+    { key:'wood',  label:'Wood' },
+    { key:'iLam',  label:'Inner Lam' },
+    { key:'oLam',  label:'Outer Lam' },
+    { key:'shut',  label:'Shutter' },
+    { key:'wall',  label:'Wall Protection' },
+  ];
+
+  let bodyRows = '';
+  filledGroups.forEach(group => {
+    // Room header row
+    bodyRows += `<tr>
+      <td colspan="6" style="background:#1c1c1c;color:#f5f0e8;padding:8px 14px;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:500">${esc(group.roomName)}</td>
+    </tr>`;
+    // Items under this room
+    group.items.forEach((item, idx) => {
+      const bg = idx % 2 === 0 ? 'white' : '#faf7f2';
+      bodyRows += `<tr style="background:${bg}">
+        <td style="padding:9px 14px 9px 20px;border-bottom:1px solid #ece7dc;font-weight:500;color:#1c1c1c;width:26%">${esc(item.label)}</td>
+        ${specFields.map(f => `<td style="padding:9px 14px;border-bottom:1px solid #ece7dc;text-align:center;font-size:11px;color:#5a5550;width:14.8%">${(item.sp[f.key]&&item.sp[f.key]!=='—')?esc(item.sp[f.key]):'<span style="color:#ccc">—</span>'}</td>`).join('')}
+      </tr>`;
+    });
+  });
+
+  return `
+    <div style="margin:24px 36px 0">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="flex:none;width:36px;height:3px;background:#c8973a"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;letter-spacing:1px">Item Specifications Summary</div>
+      </div>
+      <div style="font-size:10px;color:#8a8070;margin-bottom:12px">Material specifications per item — grouped by room. Price details not included in this section.</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:#f5f0e8">
+            <th style="padding:10px 14px;text-align:left;color:#1c1c1c;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;border-bottom:2px solid #c8973a;width:26%">Item</th>
+            <th style="padding:10px 14px;text-align:center;color:#8a8070;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500;border-bottom:2px solid #c8973a;width:14.8%">Wood</th>
+            <th style="padding:10px 14px;text-align:center;color:#8a8070;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500;border-bottom:2px solid #c8973a;width:14.8%">Inner Lam</th>
+            <th style="padding:10px 14px;text-align:center;color:#8a8070;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500;border-bottom:2px solid #c8973a;width:14.8%">Outer Lam</th>
+            <th style="padding:10px 14px;text-align:center;color:#8a8070;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500;border-bottom:2px solid #c8973a;width:14.8%">Shutter</th>
+            <th style="padding:10px 14px;text-align:center;color:#8a8070;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500;border-bottom:2px solid #c8973a;width:14.8%">Wall Protection</th>
+          </tr>
+        </thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ═══════════ PDF OPEN HELPER ═══════════
+function openHTML(html, filename) {
+  // Remove existing modal if any
+  const existing = document.getElementById('pdfModal');
+  if (existing) existing.remove();
+
+  // Create fullscreen modal overlay
+  const modal = document.createElement('div');
+  modal.id = 'pdfModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#333;z-index:9999;display:flex;flex-direction:column;';
+
+  // Toolbar
+  const toolbar = document.createElement('div');
+  toolbar.style.cssText = 'background:#1c1c1c;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:3px solid #c8973a;';
+  toolbar.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="font-family:Jost,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c8973a">Preview — ${filename.replace('.html','')}</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="window.print()" style="background:#c8973a;color:#1c1c1c;border:none;padding:8px 20px;font-family:Jost,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;">🖨 Print / Save PDF</button>
+      <button id="tryDlBtn" style="background:#555;color:white;border:none;padding:8px 20px;font-family:Jost,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">↓ Download HTML</button>
+      <button onclick="document.getElementById('pdfModal').remove();document.body.style.overflow=''" style="background:#333;color:#aaa;border:1px solid #555;padding:8px 16px;font-family:Jost,sans-serif;font-size:11px;cursor:pointer;">✕ Close</button>
+    </div>`;
+
+  // iFrame to render the HTML
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'flex:1;border:none;background:white;';
+  iframe.srcdoc = html;
+
+  modal.appendChild(toolbar);
+  modal.appendChild(iframe);
+  document.body.appendChild(modal);
+  document.body.style.overflow = 'hidden';
+
+  // Wire up download button after modal is in DOM
+  document.getElementById('tryDlBtn').onclick = function() {
+    try {
+      const blob = new Blob([html], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch(e) {
+      const w = window.open('','_blank');
+      if(w){ w.document.write(html); w.document.close(); }
+    }
+  };
 }
 
 // ═══════════ PDF ═══════════
@@ -1221,7 +1371,7 @@ ${payH?`<div class="sec"><div class="st">Payment Schedule</div>
   <table class="ptbl"><thead><tr><th>Stage</th><th>Milestone</th><th class="r">%</th><th class="r">Amount (₹)</th></tr></thead>
   <tbody>${payH}</tbody></table></div>`:''}
 ${termLines?`<div class="sec"><div class="st">Terms & Conditions</div><div style="border:1px solid #ddd5c4;padding:4px 14px">${termLines}</div></div>`:''}
-<div class="ftr">
+\n<!--SPEC_SUMMARY-->\n<div class="ftr">
   <div><div class="fb">Space Studio Interiors</div>
   <div style="font-size:10px;color:#5a5550;margin-top:2px">99675 99679 · 93918 99949 · info@spacestudiointeriors.com · www.spacestudio.in</div></div>
   <div class="ft">We Elevate Your Space</div>
@@ -1232,13 +1382,369 @@ ${termLines?`<div class="sec"><div class="st">Terms & Conditions</div><div style
 </div>
 </div></body></html>`;
 
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=`SpaceStudio_Quote_${(name||'Client').replace(/\s+/g,'_')}_${ref}.html`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  // Inject spec summary into html before opening
+  const specHtml = buildSpecSummary();
+  const htmlWithSpec = html.replace('<!--SPEC_SUMMARY-->', specHtml);
+  openHTML(htmlWithSpec, 'SpaceStudio_Internal_' + (name||'Client').replace(/\s+/g,'_') + '_' + ref + '.html');
+}
+
+
+// ═══════════ CUSTOMER PDF ═══════════
+function genCustomerPDF(){
+  const name=gv('cname'),pname=gv('pname'),cfg=gv('pcfg'),area=gv('builtup');
+  const phone=gv('cphone'),email=gv('cemail'),addr=gv('caddr'),cons=gv('cons');
+  const qdate=gv('qdate'),qvalid=gv('qvalid'),terms=gv('terms');
+  const p1=fv('p1p'),p2=fv('p2p'),p3=fv('p3p');
+  const p1n=gv('p1n'),p2n=gv('p2n'),p3n=gv('p3n');
+  const sub=subtotal(),disc=discAmt(),gt=grandTotal(),gst=gt*0.18;
+  const ref='SS-'+Date.now().toString().slice(-6);
+  const dateFmt=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
+  const today=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+  // ── Build room summary ──
+  // Group all items by room/section
+  const rooms = {};
+  const addToRoom = (roomName, cat, val) => {
+    if(!rooms[roomName]) rooms[roomName] = {Modules:0,Accessories:0,Appliances:0,Services:0,Furniture:0};
+    rooms[roomName][cat] = (rooms[roomName][cat]||0) + (parseFloat(val)||0);
+  };
+
+  // Bedrooms
+  for(let i=0;i<S.brCount;i++){
+    const chips = S.brChips[i]||[];
+    if(chips.length===0) continue;
+    const rname = S.brNames[i];
+    chips.forEach(c=>{
+      const key='br'+i+'-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom(rname,'Modules',v);
+    });
+  }
+
+  // Living Rooms
+  S.livingRooms.forEach(r=>{
+    r.chips.forEach(c=>{
+      const key='lv'+r.id+'-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom(r.name,'Modules',v);
+    });
+  });
+
+  // Dining
+  if(S.daChips.length>0){
+    S.daChips.forEach(c=>{
+      const key='da-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom('Dining Area','Modules',v);
+    });
+  }
+
+  // Pooja
+  if(S.prChips.length>0){
+    S.prChips.forEach(c=>{
+      const key='pr-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom('Pooja Room','Modules',v);
+    });
+  }
+
+  // Wash Rooms
+  S.washRooms.forEach(r=>{
+    r.chips.forEach(c=>{
+      const key='wr'+r.id+'-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom(r.name,'Modules',v);
+    });
+  });
+
+  // Kitchens
+  S.kitchens.forEach(r=>{
+    r.chips.forEach(c=>{
+      const key='kt'+r.id+'-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom(r.name,'Modules',v);
+    });
+  });
+
+  // Balconies
+  S.balconies.forEach(r=>{
+    r.chips.forEach(c=>{
+      const key='ba'+r.id+'-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom(r.name,'Modules',v);
+    });
+  });
+
+  // Front Elevation
+  if(S.feChips.length>0){
+    S.feChips.forEach(c=>{
+      const key='fe-'+c.replace(/\s/g,'_');
+      const v=getItemVal(key);
+      if(v>0) addToRoom('Front Elevation','Modules',v);
+    });
+  }
+
+  // Utility
+  const utV=getItemVal('ut');
+  if(utV>0) addToRoom('Utility','Services',utV);
+
+  // False Ceiling
+  const fcV=getItemVal('fc');
+  if(fcV>0) addToRoom('False Ceiling','Services',fcV);
+
+  // Appliances → assigned room or standalone
+  S.appliances.forEach(a=>{
+    const v=parseFloat(a.price)||0;
+    if(v>0) addToRoom(a.room||'Appliances','Appliances',v);
+  });
+
+  // Curtains → assigned room or standalone
+  S.curtains.forEach(cu=>{
+    const v=(parseFloat(cu.measurement)||0)*(parseFloat(cu.price)||0);
+    if(v>0) addToRoom(cu.room||'Curtains','Services',v);
+  });
+
+  // Furniture → assigned room or standalone
+  S.furniture.forEach(f=>{
+    const v=parseFloat(f.price)||0;
+    if(v>0) addToRoom(f.room||'Furniture','Furniture',v);
+  });
+
+  // Electrical / Plumbing / Tiles → Services
+  if(parseFloat(S.costs.elL)||parseFloat(S.costs.elM))
+    addToRoom('Electrical Work','Services',(parseFloat(S.costs.elL)||0)+(parseFloat(S.costs.elM)||0));
+  if(parseFloat(S.costs.plL)||parseFloat(S.costs.plM))
+    addToRoom('Plumbing Work','Services',(parseFloat(S.costs.plL)||0)+(parseFloat(S.costs.plM)||0));
+  if(parseFloat(S.costs.tlL)||parseFloat(S.costs.tlM))
+    addToRoom('Tiles Work','Services',(parseFloat(S.costs.tlL)||0)+(parseFloat(S.costs.tlM)||0));
+
+  // Manual items
+  S.manuals.filter(m=>m.type==='item').forEach(m=>{
+    const key='mn-'+m.id;
+    const v=getItemVal(key);
+    if(v>0) addToRoom(m.desc||'Other Items','Modules',v);
+  });
+
+  // ── Build table rows ──
+  const cats = ['Modules','Accessories','Appliances','Services','Furniture'];
+  let tableRows='', grandMod=0,grandAcc=0,grandApp=0,grandSvc=0,grandFur=0;
+  
+  const fmtCell = v => v>0 ? fmtINR(v) : '<span style="color:#ccc">—</span>';
+
+  Object.entries(rooms).forEach(([rname,cats2],idx)=>{
+    const mod=cats2.Modules||0, acc=cats2.Accessories||0, app=cats2.Appliances||0, svc=cats2.Services||0, fur=cats2.Furniture||0;
+    const tot=mod+acc+app+svc+fur;
+    grandMod+=mod; grandAcc+=acc; grandApp+=app; grandSvc+=svc; grandFur+=fur;
+    const bg=idx%2===0?'white':'#faf7f2';
+    tableRows+=`<tr style="background:${bg}">
+      <td style="padding:11px 14px;border-bottom:1px solid #ede8dc;font-weight:500">${esc(rname)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #ede8dc;text-align:right">${fmtCell(mod)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #ede8dc;text-align:right">${fmtCell(app)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #ede8dc;text-align:right">${fmtCell(svc)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #ede8dc;text-align:right">${fmtCell(fur)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #ede8dc;text-align:right;font-weight:700;color:#1c1c1c">${tot>0?fmtINR(tot):'—'}</td>
+    </tr>`;
+  });
+
+  // Totals row
+  const grandSub=grandMod+grandAcc+grandApp+grandSvc+grandFur;
+  tableRows+=`<tr style="background:#f5f0e8;font-weight:600">
+    <td style="padding:10px 14px;border-top:2px solid #c8973a;font-size:11px;letter-spacing:1px;text-transform:uppercase">Sub Total</td>
+    <td style="padding:10px 14px;border-top:2px solid #c8973a;text-align:right">${grandMod>0?fmtINR(grandMod):'—'}</td>
+    <td style="padding:10px 14px;border-top:2px solid #c8973a;text-align:right">${grandApp>0?fmtINR(grandApp):'—'}</td>
+    <td style="padding:10px 14px;border-top:2px solid #c8973a;text-align:right">${grandSvc>0?fmtINR(grandSvc):'—'}</td>
+    <td style="padding:10px 14px;border-top:2px solid #c8973a;text-align:right">${grandFur>0?fmtINR(grandFur):'—'}</td>
+    <td style="padding:10px 14px;border-top:2px solid #c8973a;text-align:right;color:#c8973a;font-size:14px">${fmtINR(grandSub)}</td>
+  </tr>`;
+
+  // Discount row
+  if(S.disc>0){
+    tableRows+=`<tr style="background:#fff5f5">
+      <td colspan="5" style="padding:9px 14px;text-align:right;color:#c0392b">Discount (${S.disc}%)</td>
+      <td style="padding:9px 14px;text-align:right;font-weight:600;color:#c0392b">– ${fmtINR(disc)}</td>
+    </tr>`;
+  }
+
+  // Grand total row
+  tableRows+=`<tr style="background:#1c1c1c;color:#f5f0e8">
+    <td colspan="5" style="padding:12px 14px;text-align:right;font-size:10px;letter-spacing:3px;text-transform:uppercase">Grand Total</td>
+    <td style="padding:12px 14px;text-align:right;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#c8973a">${fmtINR(gt)}</td>
+  </tr>
+  <tr style="background:#f0ebe0">
+    <td colspan="4" style="padding:8px 14px;font-size:11px;color:#8a8070">Billing inclusive of GST @18%</td>
+    <td style="padding:8px 14px;text-align:right;font-size:11px;color:#8a8070">GST Component</td>
+    <td style="padding:8px 14px;text-align:right;font-size:11px;color:#8a8070">${fmtINR(gst)}</td>
+  </tr>`;
+
+  // Payment rows
+  let payH='';
+  [[p1,p1n],[p2,p2n],[p3,p3n]].filter(r=>r[0]>0).forEach(([pct,nm],i)=>{
+    payH+=`<tr style="background:${i%2===0?'white':'#faf7f2'}">
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;font-weight:500">Stage ${i+1}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;color:#5a5550">${esc(nm)}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;text-align:right">${pct}%</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #ece7dc;text-align:right;font-weight:600;color:#b8864a">${fmtINR(gt*pct/100)}</td>
+    </tr>`;
+  });
+
+  const termLines=(terms||'').split('\n').filter(l=>l.trim()).map(l=>`<div style="padding:4px 0;color:#5a5550;font-size:12px;border-bottom:1px solid #f0ebe0">${esc(l.trim())}</div>`).join('');
+  const LOGO='https://static.wixstatic.com/media/9919c1_463c56997d8b464b8d3c08a87b2fd75e~mv2.png/v1/crop/x_0,y_0,w_285,h_150/fill/w_200,h_106,al_c,q_85,enc_avif,quality_auto/Untitled%20design.png';
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Space Studio – Customer Quotation ${ref}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px;line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.w{max-width:900px;margin:0 auto}
+.hdr{background:#ffffff;border-bottom:1px solid #e0d8cc;padding:22px 36px;display:flex;justify-content:space-between;align-items:center}
+.hdr-c{text-align:right;font-size:10px;color:#8a8070;line-height:1.8}
+.hdr-c a{color:#c8973a;text-decoration:none}
+.ab{height:4px;background:linear-gradient(90deg,#c8973a,#e0b96a 50%,#c8973a)}
+.tb{background:#1c1c1c;padding:10px 36px;display:flex;align-items:center;gap:12px}
+.wbadge{background:transparent;color:#c8973a;border:1px solid #c8973a;padding:3px 11px;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600}
+.cbadge{background:#c8973a;color:white;padding:3px 11px;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600}
+.ds{background:#f5f0e8;padding:13px 36px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd5c4}
+.dt{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;letter-spacing:2px}
+.dm{font-size:10px;color:#8a8070;text-align:right;line-height:1.9}
+.cg{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd5c4;margin:22px 36px 0}
+.cb2{padding:17px 20px}.cb2:first-child{border-right:1px solid #ddd5c4}
+.bh{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#c8973a;margin-bottom:9px;font-weight:500}
+.ci{margin-bottom:5px}
+.cl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8a8070;margin-bottom:2px}
+.cv{font-size:13px}.cv.big{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400}.cv.hi{font-size:17px;font-weight:600;color:#b8864a}
+.section{margin:24px 36px 0}
+.sec-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sec-line{flex:none;width:36px;height:3px;background:#c8973a}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;letter-spacing:1px}
+/* Room Summary Table */
+.rtbl{width:100%;border-collapse:collapse;font-size:12px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.rtbl thead tr{background:#1c1c1c}
+.rtbl th{color:#f5f0e8;padding:11px 14px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500}
+.rtbl th.r{text-align:right}
+/* Payment */
+.ptbl{width:100%;border-collapse:collapse;font-size:12px}
+.ptbl thead tr{background:#c8973a}
+.ptbl th{color:white;padding:9px 14px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500}
+.ptbl th.r{text-align:right}
+/* Materials */
+.mt{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #ddd5c4}
+.mt tr:nth-child(even) td{background:#faf7f2}
+.mt td{padding:8px 14px;border-bottom:1px solid #ece7dc}
+.mt td:first-child{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#8a8070;background:#faf7f2;width:158px;font-weight:500;border-right:1px solid #ddd5c4}
+.ftr{background:#1c1c1c;color:#6a6560;padding:17px 36px;display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-top:28px}
+.fb{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;letter-spacing:5px;text-transform:uppercase;color:#f5f0e8}
+.ft{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#c8973a}
+.no-p{background:#ece7dc;text-align:center;padding:20px}
+@media print{@page{margin:0;size:A4}.no-p{display:none}}
+</style></head><body><div class="w">
+
+<div class="hdr">
+  <div>
+    <img src="${LOGO}" style="height:54px;display:block" onerror="this.style.display='none';this.nextSibling.style.display='block'">
+    <div style="display:none;font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:5px;color:#1c1c1c">SPACE STUDIO</div>
+  </div>
+  <div class="hdr-c">
+    99675 99679 &nbsp;|&nbsp; 93918 99949<br>
+    info@spacestudiointeriors.com<br>
+    www.spacestudio.in<br>
+    <span style="color:#aaa090">Vijayawada · Hyderabad · Guntur · Amaravati</span>
+  </div>
+</div>
+<div class="ab"></div>
+
+<div class="tb">
+  <span class="wbadge">${esc(S.work)}</span>
+  <span class="cbadge">Customer Copy</span>
+  ${S.disc>0?`<span style="background:rgba(192,57,43,0.25);color:#ff8070;border:1px solid rgba(192,57,43,0.4);padding:3px 11px;font-size:9px;letter-spacing:2px;text-transform:uppercase">Discount: ${S.disc}%</span>`:''}
+</div>
+
+<div class="ds">
+  <div class="dt">Interior Design Quotation</div>
+  <div class="dm">
+    <strong style="color:#1c1c1c;font-size:12px">Ref: ${ref}</strong><br>
+    Date: ${qdate?dateFmt(qdate):today}<br>
+    ${qvalid?`Valid Till: ${dateFmt(qvalid)}`:'Valid: 30 days'}
+    ${cons?`<br>Consultant: ${esc(cons)}`:''}
+  </div>
+</div>
+
+<div class="cg">
+  <div class="cb2">
+    <div class="bh">Client Details</div>
+    <div class="ci"><div class="cl">Name</div><div class="cv big">${esc(name)||'—'}</div></div>
+    ${phone?`<div class="ci"><div class="cl">Phone</div><div class="cv">${esc(phone)}</div></div>`:''}
+    ${email?`<div class="ci"><div class="cl">Email</div><div class="cv">${esc(email)}</div></div>`:''}
+    ${addr?`<div class="ci"><div class="cl">Address</div><div class="cv">${esc(addr)}</div></div>`:''}
+  </div>
+  <div class="cb2">
+    <div class="bh">Project Details</div>
+    ${pname?`<div class="ci"><div class="cl">Project</div><div class="cv big">${esc(pname)}</div></div>`:''}
+    ${cfg?`<div class="ci"><div class="cl">Configuration</div><div class="cv">${esc(cfg)}</div></div>`:''}
+    ${area?`<div class="ci"><div class="cl">Built-up Area</div><div class="cv">${esc(area)} Sq.ft</div></div>`:''}
+    <div class="ci" style="margin-top:7px"><div class="cl">Grand Total</div><div class="cv hi">${fmtINR(gt)}</div></div>
+    <div style="font-size:10px;color:#8a8070;margin-top:2px">Inclusive of GST @18% (= ${fmtINR(gst)})</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-hdr"><div class="sec-line"></div><div class="sec-title">Room Summary</div></div>
+  <table class="rtbl">
+    <thead><tr>
+      <th style="width:32%">Room Name</th>
+      <th class="r" style="width:17%">Modules</th>
+      <th class="r" style="width:17%">Appliances</th>
+      <th class="r" style="width:17%">Services</th>
+      <th class="r" style="width:12%">Furniture</th>
+      <th class="r" style="width:13%">Total</th>
+    </tr></thead>
+    <tbody>${tableRows}</tbody>
+  </table>
+</div>
+
+<div class="section">
+  <div class="sec-hdr"><div class="sec-line"></div><div class="sec-title">Materials & Specifications</div></div>
+  <table class="mt">
+    <tr><td>Type of Work</td><td>${esc(gv('mWork'))}</td></tr>
+    <tr><td>Finish</td><td>${esc(gv('mFin'))}</td></tr>
+    <tr><td>Plywood</td><td>${esc(gv('mPly'))}</td></tr>
+    <tr><td>Hardware</td><td>${esc(gv('mHw'))}</td></tr>
+    <tr><td>Laminate</td><td>${esc(gv('mLam'))}</td></tr>
+    <tr><td>Customisation</td><td>${esc(gv('mCust'))}</td></tr>
+    <tr><td>Glass</td><td>${esc(gv('mGlass'))}</td></tr>
+  </table>
+</div>
+
+${payH?`<div class="section">
+  <div class="sec-hdr"><div class="sec-line"></div><div class="sec-title">Payment Schedule</div></div>
+  <table class="ptbl">
+    <thead><tr><th>Stage</th><th>Milestone</th><th class="r">%</th><th class="r">Amount (₹)</th></tr></thead>
+    <tbody>${payH}</tbody>
+  </table>
+</div>`:''}
+
+${termLines?`<div class="section">
+  <div class="sec-hdr"><div class="sec-line"></div><div class="sec-title">Terms & Conditions</div></div>
+  <div style="border:1px solid #ddd5c4;padding:4px 14px">${termLines}</div>
+</div>`:''}
+
+<!--SPEC_SUMMARY-->
+
+<div class="ftr">
+  <div><div class="fb">Space Studio Interiors</div>
+  <div style="font-size:10px;color:#5a5550;margin-top:2px">99675 99679 · 93918 99949 · info@spacestudiointeriors.com · www.spacestudio.in</div></div>
+  <div class="ft">We Elevate Your Space</div>
+</div>
+
+<div class="no-p">
+  <p style="font-size:12px;color:#6b6560"><strong>Ctrl+P</strong> → <strong>Save as PDF</strong> → Margins: <strong>None</strong></p>
+  <button onclick="window.print()" style="background:#1c1c1c;color:white;border:none;padding:9px 26px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:9px">Print / Save as PDF</button>
+</div>
+</div></body></html>`;
+
+  const specHtmlCust = buildSpecSummary();
+  const htmlWithSpecCust = html.replace('<!--SPEC_SUMMARY-->', specHtmlCust);
+  openHTML(htmlWithSpecCust, 'SpaceStudio_Customer_' + (name||'Client').replace(/\s+/g,'_') + '_' + ref + '.html');
 }
 
 // ═══════════ INIT ═══════════
@@ -1248,11 +1754,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   const vd=new Date(t); vd.setDate(vd.getDate()+30);
   document.getElementById('qvalid').value=vd.toISOString().split('T')[0];
 
-  // Living room chips
-  renderRoomChips('lvChips',C.lvChips,S.lvChips,c=>{toggleChip(S.lvChips,c);renderRoomChips('lvChips',C.lvChips,S.lvChips,arguments.callee);renderTable();renderSummary();});
-  // Hack: re-bind with closures
+  // Addable room types - initialize cards
+  renderRoomCards('lv');
+  // Static chip sections
   function bindChips(elId,list,arr){ renderRoomChips(elId,list,arr, c=>{toggleChip(arr,c);bindChips(elId,list,arr);renderTable();renderSummary();}); }
-  bindChips('lvChips',C.lvChips,S.lvChips);
   bindChips('daChips',C.daChips,S.daChips);
   bindChips('prChips',C.prChips,S.prChips);
   bindChips('feChips',C.feChips,S.feChips);
