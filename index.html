@@ -490,8 +490,8 @@ const C = {
   ktChips: ['Base Cabinets','Wall Units','Loft','Pantry Unit','Oven Unit','Shutter','Tall Unit','Breakfast Counter'],
   baChips: ['Sit Out','Wall Claddings','Safety Grills'],
   feChips: ['Door Panelling','Shoe Rack','Safety Grills'],
-  fcTypes: ['Gypsum','POP','Wooden','PVC'],
-  apTypes: ['Tandoor','Corner Unit','Pantry Unit','Shutter','Chimney','Hob','Sink','Gas Oven','Grill','Wash Basin','Refrigerator','AC','Fan','TV'],
+  fcTypes: ['Gypsum + POP','Wooden + PVC'],
+  apTypes: ['Tandem','Corner Unit','Pantry Unit','Shutter','Chimney','Hob','Sink','Gas Oven','Grill','Wash Basin','Refrigerator','AC','Fan','TV'],
   fuTypes: ['Sofa','Recliner','Bed','Swing','Dining Table','Chairs','Stool'],
   brLabels: ['Master Bedroom','Bedroom 2','Bedroom 3','Bedroom 4','Bedroom 5','Bedroom 6'],
   brShort:  ['MBR','BR2','BR3','BR4','BR5','BR6'],
@@ -1077,7 +1077,8 @@ function buildSpecSummary() {
     } else if(r.type === 'item' && currentGroup) {
       const sp = getSp(r.key);
       const hasSpec = sp.wood||sp.iLam||sp.oLam||sp.shut||sp.wall;
-      if(hasSpec) currentGroup.items.push({ label: r.label.replace(/^[^–]+ – /, ''), sp });
+      const itemLabel = (getF(r.key).desc && getF(r.key).desc !== r.label) ? getF(r.key).desc : r.label.replace(/^[^–]+ – /, '');
+      if(hasSpec) currentGroup.items.push({ label: itemLabel, sp });
     }
   });
 
@@ -1217,8 +1218,9 @@ function genPDF(){
       else if(r.key.startsWith('fu-')){ const fu=S.furniture.find(x=>'fu-'+x.id===r.key); pDisplay=fu&&fu.price?fmtINR(parseFloat(fu.price)):'—'; }
       else if(['el-labor','el-material','pl-labor','pl-material','tl-labor','tl-material'].includes(r.key)){ pDisplay=fmtINR(getItemVal(r.key)); }
       else { aDisplay=f.area||'—'; pDisplay=f.price?fmtINR(parseFloat(f.price)):(f.fixed?'Lump Sum':'—'); }
-      rowsH+=`<tr style="border-bottom:1px solid #ece7dc">
-        <td style="padding:8px 14px">${esc(r.label)}${specTxt?`<br><span style="font-size:10px;color:#8a8070">${esc(specTxt)}</span>`:''}</td>
+      const pdfDesc = (getF(r.key).desc && getF(r.key).desc !== r.label) ? getF(r.key).desc : r.label;
+    rowsH+=`<tr style="border-bottom:1px solid #ece7dc">
+        <td style="padding:8px 14px">${esc(pdfDesc)}${specTxt?`<br><span style="font-size:10px;color:#8a8070">${esc(specTxt)}</span>`:''}</td>
         <td style="padding:8px 14px;text-align:right">${aDisplay}</td>
         <td style="padding:8px 14px;text-align:right">${pDisplay}</td>
         <td style="padding:8px 14px;text-align:right;font-weight:500">${vv>0?fmtINR(vv):'—'}</td>
