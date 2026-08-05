@@ -490,8 +490,8 @@ const C = {
   ktChips: ['Base Cabinets','Wall Units','Loft','Pantry Unit','Oven Unit','Shutter','Tall Unit','Breakfast Counter'],
   baChips: ['Sit Out','Wall Claddings','Safety Grills'],
   feChips: ['Door Panelling','Shoe Rack','Safety Grills'],
-  fcTypes: ['Gypsum + POP','Wooden + PVC'],
-  apTypes: ['Tandem','Corner Unit','Pantry Unit','Shutter','Chimney','Hob','Sink','Gas Oven','Grill','Wash Basin','Refrigerator','AC','Fan','TV'],
+  fcTypes: ['Gypsum / POP','Wooden','PVC'],
+  apTypes: ['Tandem','Corner Unit','Pantry Unit','Shutter','Chimney','Hob','Sink','Oven','Grill','Wash Basin','Refrigerator','AC','Fan','TV'],
   fuTypes: ['Sofa','Recliner','Bed','Swing','Dining Table','Chairs','Stool'],
   brLabels: ['Master Bedroom','Bedroom 2','Bedroom 3','Bedroom 4','Bedroom 5','Bedroom 6'],
   brShort:  ['MBR','BR2','BR3','BR4','BR5','BR6'],
@@ -512,7 +512,7 @@ let S = {
   brNames: [...C.brLabels],
   brChips: [[],[],[],[],[],[]],
   livingRooms: [], daChips: [], prChips: [], feChips: [],
-  fcType: '',
+  fcTypes_sel: [],
   washRooms: [], kitchens: [], balconies: [],
   appliances: [], curtains: [], furniture: [],
   costs: {elL:'',elM:'',plL:'',plM:'',tlL:'',tlM:''},
@@ -567,8 +567,11 @@ function allItems() {
   if(S.feChips.length>0){ add('group','grp-fe','Front Elevation'); S.feChips.forEach(c=>add('item','fe-'+c.replace(/\s/g,'_'),'Front Elevation – '+c,'fe')); }
   // Utility
   const utF=getF('ut'); if(utF.area||utF.price){ add('group','grp-ut','Utility'); add('item','ut','Utility Area','ut'); }
-  // False Ceiling
-  if(S.fcType){ add('group','grp-fc','False Ceiling'); add('item','fc','False Ceiling – '+S.fcType,'fc'); }
+  // False Ceiling - one item per selected type
+  if(S.fcTypes_sel.length>0){
+    add('group','grp-fc','False Ceiling');
+    S.fcTypes_sel.forEach(t=>add('item','fc-'+t.replace(/\s/g,'_'),'False Ceiling – '+t,'fc'));
+  }
   // Appliances
   if(S.appliances.length>0){ add('group','grp-ap','Appliances'); S.appliances.forEach(a=>add('item','ap-'+a.id,a.type,'ap')); }
   // Curtains
@@ -730,12 +733,22 @@ function toggleRoomChip(type,id,chip){
 
 // ═══════════ FALSE CEILING ═══════════
 function renderFCTypes(){
-  renderRoomChips('fcTypeChips', C.fcTypes, S.fcType?[S.fcType]:[], c=>{
-    S.fcType = S.fcType===c?'':c;
-    renderFCTypes();
-    const ff=document.getElementById('fcFields');
-    if(ff)ff.style.display=S.fcType?'grid':'none';
-    renderTable(); renderSummary();
+  const el=document.getElementById('fcTypeChips'); if(!el)return;
+  el.innerHTML='';
+  C.fcTypes.forEach(c=>{
+    const sel=S.fcTypes_sel.includes(c);
+    const btn=document.createElement('button');
+    btn.className='chip'+(sel?' on':'');
+    btn.textContent=c;
+    btn.onclick=()=>{
+      const idx=S.fcTypes_sel.indexOf(c);
+      if(idx>=0) S.fcTypes_sel.splice(idx,1); else S.fcTypes_sel.push(c);
+      renderFCTypes();
+      const ff=document.getElementById('fcFields');
+      if(ff)ff.style.display=S.fcTypes_sel.length>0?'grid':'none';
+      renderTable(); renderSummary();
+    };
+    el.appendChild(btn);
   });
 }
 
@@ -994,7 +1007,7 @@ function delItem(key,group){
   else if(group==='fu'){ S.furniture=S.furniture.filter(x=>'fu-'+x.id!==key); renderFurniture(); }
   else if(group==='mn'){ const mid=key.replace('mn-',''); S.manuals=S.manuals.filter(x=>x.id!==mid); }
   else if(key==='ut'){ S.iF['ut']={area:'',price:'',fixed:'',desc:''}; document.getElementById('utA').value=''; document.getElementById('utP').value=''; }
-  else if(key==='fc'){ S.fcType=''; renderFCTypes(); }
+  else if(key.startsWith('fc-')){ const t=key.replace('fc-','').replace(/_/g,' '); const i=S.fcTypes_sel.indexOf(t); if(i>=0)S.fcTypes_sel.splice(i,1); renderFCTypes(); }
   delete S.iF[key]; delete S.iSp[key]; S.expanded.delete(key);
   renderTable(); renderSummary();
 }
@@ -1305,7 +1318,7 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
     99675 99679 &nbsp;|&nbsp; 93918 99949<br>
     info@spacestudiointeriors.com<br>
     www.spacestudio.in<br>
-    <span style="color:#aaa090">Vijayawada · Hyderabad · Guntur · Amaravati</span>
+    <span style="color:#aaa090">Andhra Pradesh &amp; Telangana</span>
   </div>
 </div>
 <div class="ab"></div>
@@ -1490,9 +1503,12 @@ function genCustomerPDF(){
   const utV=getItemVal('ut');
   if(utV>0) addToRoom('Utility','Services',utV);
 
-  // False Ceiling
-  const fcV=getItemVal('fc');
-  if(fcV>0) addToRoom('False Ceiling','Services',fcV);
+  // False Ceiling - multiple types
+  S.fcTypes_sel.forEach(t=>{
+    const key='fc-'+t.replace(/\s/g,'_');
+    const v=getItemVal(key);
+    if(v>0) addToRoom('False Ceiling','Services',v);
+  });
 
   // Appliances → assigned room or standalone
   S.appliances.forEach(a=>{
@@ -1650,7 +1666,7 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
     99675 99679 &nbsp;|&nbsp; 93918 99949<br>
     info@spacestudiointeriors.com<br>
     www.spacestudio.in<br>
-    <span style="color:#aaa090">Vijayawada · Hyderabad · Guntur · Amaravati</span>
+    <span style="color:#aaa090">Andhra Pradesh &amp; Telangana</span>
   </div>
 </div>
 <div class="ab"></div>
