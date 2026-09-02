@@ -131,7 +131,6 @@ textarea{resize:vertical;min-height:56px}
 .sub-r td{background:#fdf7ee;padding:8px 9px;font-weight:600;border-top:2px solid var(--gold)}
 .disc-r td{background:#fff5f5;padding:7px 9px;color:var(--red)}
 .gt-r td{background:var(--dark);color:#f5f0e8;padding:10px 9px;font-weight:500}
-.gst-r td{background:#f0ebe0;padding:6px 9px;font-size:11px;color:var(--muted)}
 
 /* MATERIALS */
 .mw{border:1px solid var(--border)}
@@ -460,8 +459,7 @@ textarea{resize:vertical;min-height:56px}
     </div>
     <div class="fld s2" style="margin-top:12px">
       <label>Terms & Conditions</label>
-      <textarea id="terms">• Billing is inclusive of GST
-• All prices subject to final site measurements — may vary ±5–10%
+      <textarea id="terms">• All prices subject to final site measurements — may vary ±5–10%
 • Quoted rates valid for 30 days from date of issue
 • Design changes post production may attract additional charges</textarea>
     </div>
@@ -911,7 +909,7 @@ function renderTable(){
 
   // Totals
   const tot=document.getElementById('itTotals'); if(!tot)return;
-  const sub=subtotal(), disc=discAmt(), gt=grandTotal(), gst=gt*0.18;
+  const sub=subtotal(), disc=discAmt(), gt=grandTotal();
   let th=`<tr class="sub-r">
     <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Sub Total</td>
     <td class="val" style="background:#fdf7ee;font-size:13px;color:var(--acc)">${fmtINR(sub)}</td><td></td><td></td>
@@ -926,15 +924,11 @@ function renderTable(){
     <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Grand Total</td>
     <td style="text-align:right;background:#252525;padding:10px 9px;font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold)">${fmtINR(gt)}</td><td style="background:#252525"></td><td style="background:#252525"></td>
   </tr>
-  <tr class="gst-r">
-    <td colspan="2">Billing inclusive of GST @18%</td>
-    <td style="text-align:right">GST Component</td>
-    <td class="val" style="background:#f0ebe0">${fmtINR(gst)}</td><td></td><td></td>
-  </tr>`;
+  `;
   tot.innerHTML=th;
 
   // Update badge
-  document.getElementById('badge').textContent = gt>0 ? fmtINR(gt)+' (incl. GST '+fmtINR(gst)+')' : '';
+  document.getElementById('badge').textContent = gt>0 ? fmtINR(gt) : '';
   renderSummary();
 }
 
@@ -964,7 +958,7 @@ function refreshValCell(key){
   updateTotalsOnly();
 }
 function updateTotalsOnly(){
-  const sub=subtotal(), disc=discAmt(), gt=grandTotal(), gst=gt*0.18;
+  const sub=subtotal(), disc=discAmt(), gt=grandTotal();
   const tot=document.getElementById('itTotals'); if(!tot)return;
   let th=`<tr class="sub-r">
     <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Sub Total</td>
@@ -980,13 +974,9 @@ function updateTotalsOnly(){
     <td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Grand Total</td>
     <td style="text-align:right;background:#252525;padding:10px 9px;font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold)">${fmtINR(gt)}</td><td style="background:#252525"></td><td style="background:#252525"></td>
   </tr>
-  <tr class="gst-r">
-    <td colspan="2">Billing inclusive of GST @18%</td>
-    <td style="text-align:right">GST Component</td>
-    <td class="val" style="background:#f0ebe0">${fmtINR(gst)}</td><td></td><td></td>
-  </tr>`;
+  `;
   tot.innerHTML=th;
-  document.getElementById('badge').textContent = gt>0 ? fmtINR(gt)+' (incl. GST '+fmtINR(gst)+')' : '';
+  document.getElementById('badge').textContent = gt>0 ? fmtINR(gt) : '';
   // update discount preview in cfg strip
   if(S.disc>0){ const pre=document.getElementById('discPre'); if(pre&&disc>0)pre.textContent='–'+fmtINR(disc); }
   renderSummary();
@@ -1018,7 +1008,7 @@ function renderSummary(){
   const phone=gv('cphone'),addr=gv('caddr');
   const p1=fv('p1p'),p2=fv('p2p'),p3=fv('p3p');
   const p1n=gv('p1n'),p2n=gv('p2n'),p3n=gv('p3n');
-  const sub=subtotal(),disc=discAmt(),gt=grandTotal(),gst=gt*0.18;
+  const sub=subtotal(),disc=discAmt(),gt=grandTotal();
   const el=document.getElementById('sumContent');
 
   if(!name&&gt===0){el.innerHTML='<div class="se">Fill in client details and select room items to see the live preview.</div>';return;}
@@ -1043,7 +1033,7 @@ function renderSummary(){
     h+=`<div class="stot">
       <div class="stot-l">Grand Total</div>
       <div class="stot-v">${fmtINR(gt)}</div>
-      <div class="stot-n">GST @18% = ${fmtINR(gst)} · Inclusive in billing</div>
+
     </div>`;
     if(p1||p2||p3){
       h+=`<hr class="sdv"><div><div class="slim">Payment</div>`;
@@ -1204,7 +1194,7 @@ function genPDF(){
   const qdate=gv('qdate'),qvalid=gv('qvalid'),terms=gv('terms');
   const p1=fv('p1p'),p2=fv('p2p'),p3=fv('p3p');
   const p1n=gv('p1n'),p2n=gv('p2n'),p3n=gv('p3n');
-  const sub=subtotal(),disc=discAmt(),gt=grandTotal(),gst=gt*0.18;
+  const sub=subtotal(),disc=discAmt(),gt=grandTotal();
   const ref='SS-'+Date.now().toString().slice(-6);
   const dateFmt=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
   const today=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
@@ -1287,7 +1277,6 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
 .sub-r td{background:#fdf7ee;padding:8px 14px;font-weight:600;border-top:2px solid #c8973a}
 .disc-r td{background:#fff5f5;padding:7px 14px;color:#c0392b}
 .gt-r td{background:#1c1c1c;color:#f5f0e8;padding:11px 14px;font-weight:500}
-.gst-r td{background:#f0ebe0;padding:7px 14px;font-size:11px;color:#8a8070}
 .ptbl{width:100%;border-collapse:collapse;font-size:12px}
 .ptbl thead tr{background:#c8973a}
 .ptbl th{color:white;padding:9px 14px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:500}
@@ -1316,7 +1305,7 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
   </div>
   <div class="hdr-c">
     99675 99679 &nbsp;|&nbsp; 93918 99949<br>
-    info@spacestudiointeriors.com<br>
+    info@spacestudio.in<br>
     www.spacestudio.in<br>
     <span style="color:#aaa090">Andhra Pradesh &amp; Telangana</span>
   </div>
@@ -1349,7 +1338,7 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
     ${cfg?`<div class="ci"><div class="cl">Configuration</div><div class="cv">${esc(cfg)}</div></div>`:''}
     ${area?`<div class="ci"><div class="cl">Built-up Area</div><div class="cv">${esc(area)} Sq.ft</div></div>`:''}
     <div class="ci" style="margin-top:7px"><div class="cl">Grand Total</div><div class="cv hi">${fmtINR(gt)}</div></div>
-    <div style="font-size:10px;color:#8a8070;margin-top:2px">Inclusive of GST @18% (= ${fmtINR(gst)})</div>
+
   </div>
 </div>
 <div class="sec">
@@ -1366,7 +1355,7 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
       <tr class="sub-r"><td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Sub Total</td><td style="text-align:right">${fmtINR(sub)}</td></tr>
       ${S.disc>0?`<tr class="disc-r"><td colspan="3" style="text-align:right">Discount (${S.disc}%)</td><td style="text-align:right">– ${fmtINR(disc)}</td></tr>`:''}
       <tr class="gt-r"><td colspan="3" style="text-align:right;font-size:9px;letter-spacing:2px;text-transform:uppercase">Grand Total</td><td style="text-align:right;font-family:'Cormorant Garamond',serif;font-size:21px;color:#c8973a">${fmtINR(gt)}</td></tr>
-      <tr class="gst-r"><td colspan="2">Billing inclusive of GST @18%</td><td style="text-align:right">GST Component</td><td style="text-align:right">${fmtINR(gst)}</td></tr>
+      
     </tbody>
   </table>
 </div>
@@ -1388,7 +1377,7 @@ ${payH?`<div class="sec"><div class="st">Payment Schedule</div>
 ${termLines?`<div class="sec"><div class="st">Terms & Conditions</div><div style="border:1px solid #ddd5c4;padding:4px 14px">${termLines}</div></div>`:''}
 \n<!--SPEC_SUMMARY-->\n<div class="ftr">
   <div><div class="fb">Space Studio Interiors</div>
-  <div style="font-size:10px;color:#5a5550;margin-top:2px">99675 99679 · 93918 99949 · info@spacestudiointeriors.com · www.spacestudio.in</div></div>
+  <div style="font-size:10px;color:#5a5550;margin-top:2px">99675 99679 · 93918 99949 · info@spacestudio.in · www.spacestudio.in</div></div>
   <div class="ft">We Elevate Your Space</div>
 </div>
 <div class="no-p">
@@ -1411,7 +1400,7 @@ function genCustomerPDF(){
   const qdate=gv('qdate'),qvalid=gv('qvalid'),terms=gv('terms');
   const p1=fv('p1p'),p2=fv('p2p'),p3=fv('p3p');
   const p1n=gv('p1n'),p2n=gv('p2n'),p3n=gv('p3n');
-  const sub=subtotal(),disc=discAmt(),gt=grandTotal(),gst=gt*0.18;
+  const sub=subtotal(),disc=discAmt(),gt=grandTotal();
   const ref='SS-'+Date.now().toString().slice(-6);
   const dateFmt=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
   const today=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
@@ -1589,9 +1578,7 @@ function genCustomerPDF(){
     <td style="padding:12px 14px;text-align:right;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#c8973a">${fmtINR(gt)}</td>
   </tr>
   <tr style="background:#f0ebe0">
-    <td colspan="4" style="padding:8px 14px;font-size:11px;color:#8a8070">Billing inclusive of GST @18%</td>
-    <td style="padding:8px 14px;text-align:right;font-size:11px;color:#8a8070">GST Component</td>
-    <td style="padding:8px 14px;text-align:right;font-size:11px;color:#8a8070">${fmtINR(gst)}</td>
+
   </tr>`;
 
   // Payment rows
@@ -1664,7 +1651,7 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
   </div>
   <div class="hdr-c">
     99675 99679 &nbsp;|&nbsp; 93918 99949<br>
-    info@spacestudiointeriors.com<br>
+    info@spacestudio.in<br>
     www.spacestudio.in<br>
     <span style="color:#aaa090">Andhra Pradesh &amp; Telangana</span>
   </div>
@@ -1701,7 +1688,7 @@ body{font-family:'Jost',sans-serif;color:#1c1c1c;background:white;font-size:12px
     ${cfg?`<div class="ci"><div class="cl">Configuration</div><div class="cv">${esc(cfg)}</div></div>`:''}
     ${area?`<div class="ci"><div class="cl">Built-up Area</div><div class="cv">${esc(area)} Sq.ft</div></div>`:''}
     <div class="ci" style="margin-top:7px"><div class="cl">Grand Total</div><div class="cv hi">${fmtINR(gt)}</div></div>
-    <div style="font-size:10px;color:#8a8070;margin-top:2px">Inclusive of GST @18% (= ${fmtINR(gst)})</div>
+
   </div>
 </div>
 
@@ -1750,7 +1737,7 @@ ${termLines?`<div class="section">
 
 <div class="ftr">
   <div><div class="fb">Space Studio Interiors</div>
-  <div style="font-size:10px;color:#5a5550;margin-top:2px">99675 99679 · 93918 99949 · info@spacestudiointeriors.com · www.spacestudio.in</div></div>
+  <div style="font-size:10px;color:#5a5550;margin-top:2px">99675 99679 · 93918 99949 · info@spacestudio.in · www.spacestudio.in</div></div>
   <div class="ft">We Elevate Your Space</div>
 </div>
 
